@@ -10,26 +10,12 @@ repos:
     hooks:
     # NOTE: This is a total unnecessary check, just used as part of the
     #       template. Remove this after creating the template.
-    - id: check-python
-      name: check-python
-      entry: python --version
-      language: system
-      pass_filenames: no
 
     - id: black
       name: black
       entry: black
       language: system
       pass_filenames: true
-      types:
-        - python
-
-    - id: ruff
-      name: ruff
-      entry: ruff --fix
-      language: system
-      pass_filenames: true
-      files: "./"
       types:
         - python
 

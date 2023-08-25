@@ -1,13 +1,12 @@
 # Transfer mass vizsolver
 
-Educational project to tech mass transfer
-
-
-* Documentation: https://osl-template.com
+This Project aims to facilitate the teaching of mass transfer phenomena. Designed in python, it intends to be a library that uses graphical methods and that applies modern equations to predict the behavior of mass transfer.
 
 ## Features
 
-TBD
+Now this repo has a module to graph an example for mcthiele solution to binary destilation
+
+![mccabe thiele](docs/dest.png)
 
 ## Credits
 
