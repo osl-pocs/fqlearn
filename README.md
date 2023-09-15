@@ -6,6 +6,17 @@ This Project aims to facilitate the teaching of mass transfer phenomena. Designe
 
 Now this repo has a module to graph an example for mcthiele solution to binary destilation
 
+## Example
+
+```python
+from fqlearn import McCabeThiele
+
+model = McCabeThiele()
+model.set_data(compound_a="methanol", compound_b="water")
+model.fit(xF=0.5, xD=0.94, xW=0.05)
+model.plot()
+```
+
 ![mccabe thiele](docs/dest.png)
 
 ## Credits

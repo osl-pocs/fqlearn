@@ -2,26 +2,23 @@ default_stages:
   - commit
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.1.0
+    rev: v4.4.0
     hooks:
       - id: end-of-file-fixer
 
   - repo: local
     hooks:
-    # NOTE: This is a total unnecessary check, just used as part of the
-    #       template. Remove this after creating the template.
-
-    - id: black
+    - entry: black
+      id: black
       name: black
-      entry: black
       language: system
       pass_filenames: true
       types:
         - python
 
     - id: isort
-      name: isort
       entry: isort
+      name: isort
       language: system
       pass_filenames: true
       types:
