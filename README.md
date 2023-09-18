@@ -1,10 +1,10 @@
-# Transfer mass vizsolver
+# fqlearn
 
-This Project aims to facilitate the teaching of mass transfer phenomena. Designed in python, it intends to be a library that uses graphical methods and that applies modern equations to predict the behavior of mass transfer.
+This Project aims to facilitate the teaching of unit operations and thermodynamics. Designed in python, it intends to be a library that uses graphical methods and that applies modern equations solve problems related.
 
 ## Features
 
-Now this repo has a module to graph an example for mcthiele solution to binary destilation
+Now this repo has a module to graph an example for McCabeThiele solution to binary destilation
 
 ## Example
 
@@ -18,6 +18,20 @@ model.plot()
 ```
 
 ![mccabe thiele](docs/dest.png)
+
+## Contributing
+
+We welcome contributions from the community. If you'd like to contribute to this project, please follow these guidelines:
+
+- Fork the repository.
+- Create a new branch for your feature or bug fix: `git checkout -b feature-name`
+- Commit your changes and provide descriptive commit messages.
+- Push your branch to your fork: `git push origin feature-name`
+- Create a Pull Request to the `main` branch of the original repository.
+
+## License
+
+This project is licensed under the [CC-BY-4.0](./LICENSE.md).
 
 ## Credits
 
