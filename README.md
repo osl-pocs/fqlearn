@@ -1,4 +1,4 @@
-# OpenThermoPy
+# fqlearn
 
 This Project aims to facilitate the teaching of unit operations and thermodynamics. Designed in python, it intends to be a library that uses graphical methods and that applies modern equations solve problems related.
 
