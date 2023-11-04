@@ -1,10 +1,13 @@
-from hermite import pchint
 import csv
-import numpy as np
+import os
+
 import matplotlib.pyplot as plt
+import numpy as np
+
+from .hermite import pchint
+
 
 class McCabeThiele:
-    
     def __init__(self):
         self.available_pair = [("methanol", "water")]
 
@@ -14,17 +17,18 @@ class McCabeThiele:
             self.compound_b = compound_b
             self.x = []
             self.y = []
-            with open(f"{self.compound_a}-{self.compound_b}.csv") as f:
+            print(os.getcwd())
+            with open("src/data/" f"{self.compound_a}-{self.compound_b}.csv") as f:
                 reader = csv.DictReader(f)
                 for row in reader:
                     self.x.append(float(row["x"]))
                     self.y.append(float(row["y"]))
         else:
             print("There no available data for that pair compounds")
-    
+
     def eq_line(self, a, b):
         return lambda x: a + b * x
-    
+
     def inter_vline(self, x, data_x, data_y):
         n = len(data_x)
         i, j = 0, n - 1
@@ -59,17 +63,17 @@ class McCabeThiele:
         y_in = line(x_in)
 
         return x_in, y_in
-    
+
     def reflux_min(self, x_in, y_in, x_D):
         k = (x_D - x_in) / (x_D - y_in)
         R = 1 / (k - 1)
         self.Rmin = R
         return R
-    
+
     def interpolate_data(self):
         self.x_data = np.linspace(self.x[0], self.x[-1], 100)
         self.y_data = pchint(self.x, self.y, self.x_data)
-    
+
     def fit(self, xF, xD, xW):
         self.xF = xF
         self.xD = xD
@@ -87,7 +91,6 @@ class McCabeThiele:
         origin = -slope * xF + yF
         self.line_strip = self.eq_line(origin, slope)
 
-        
         xp = xD
         self.xe.append(xD)
         self.ye.append(xD)
@@ -109,7 +112,7 @@ class McCabeThiele:
             self.xe.append(xpn)
 
         self.steps = etapas
-    
+
     def plot(self):
         x_rect = np.linspace(self.xF, self.xD, 50)
         y_rect = np.array([self.line_recti(x) for x in x_rect])

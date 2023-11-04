@@ -23,3 +23,14 @@ repos:
       pass_filenames: true
       types:
         - python
+
+# Implement this with the new tests
+    # - id: vulture
+    #   name: vulture
+    #   entry: vulture
+    #   language: system
+    #   files: "src/"
+    #   description: Find unused Python code.
+    #   pass_filenames: true
+    #   types:
+    #     - python

@@ -1,0 +1,17 @@
+name: fqlearn
+channels:
+  - nodefaults
+  - conda-forge
+dependencies:
+  - python 3.10
+  - matplotlib
+  - numpy
+  - pandas
+  - black
+  - isort
+  - pre-commit
+  - pip
+  - vulture
+  - pip:
+    - makim==1.8.2
+    

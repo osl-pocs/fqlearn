@@ -45,9 +45,7 @@ def pchint(x, y, x0):
             alfa = m[i] / d[i]
             beta = m[i + 1] / d[i]
 
-            condicion = (
-                alfa - ((2 * alfa + beta - 3) ** 2) / (alfa + beta - 2) / 3
-            )
+            condicion = alfa - ((2 * alfa + beta - 3) ** 2) / (alfa + beta - 2) / 3
 
             while condicion < 0:
                 tau = 3 / math.sqrt(alfa**2 + beta**2)
@@ -55,9 +53,7 @@ def pchint(x, y, x0):
                 beta = tau * beta
                 m[i] = alfa * d[i]
                 m[i + 1] = beta * d[i]
-                condicion = (
-                    alfa - ((2 * alfa + beta - 3) ** 2) / (alfa + beta - 2) / 3
-                )
+                condicion = alfa - ((2 * alfa + beta - 3) ** 2) / (alfa + beta - 2) / 3
     pos = 0
     c = 0
     F = np.zeros(len(x0))
