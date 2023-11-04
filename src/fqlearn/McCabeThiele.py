@@ -4,7 +4,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .hermite import pchint
+from utils.hermite import pchint
 
 
 class McCabeThiele:
