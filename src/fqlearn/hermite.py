@@ -41,14 +41,13 @@ def h10(t: float) -> float:
 
     Returns
     ------
-    h10 : float
+    f : float
         returns t^3 - 2t^2 + t
         evaluated at t.
     """
+    f = t**3 - 2 * t**2 + t
 
-    h10 = t**3 - 2 * t**2 + t
-
-    return h10
+    return f
 
 
 def h01(t: float) -> float:
@@ -62,13 +61,13 @@ def h01(t: float) -> float:
 
     Returns
     ------
-    h01 : float
+    f : float
         returns -2t^3 + 3t^2
         evaluated at t.
     """
+    f = -2 * t**3 + 3 * t**2
 
-    h01 = -2 * t**3 + 3 * t**2
-    return h01
+    return f
 
 
 def h11(t: float) -> float:
@@ -82,13 +81,13 @@ def h11(t: float) -> float:
 
     Returns
     -------
-    h11 : float
+    f : float
         returns t^3 - t^2
         evaluated at t
     """
+    f = t**3 - t**2
 
-    h11 = t**3 - t**2
-    return h11
+    return f
 
 
 # TODO: Complete docstring check numpy arrays type
