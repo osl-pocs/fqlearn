@@ -25,9 +25,9 @@ def h00(t: float) -> float:
         returns 2t^3 - 3t^2 + 1
         evaluated at t.
     """
-    h00 = 2 * t**3 - 3 * t**2 + 1
+    f = 2 * t**3 - 3 * t**2 + 1
 
-    return h00
+    return f
 
 
 def h10(t: float) -> float:
@@ -100,14 +100,14 @@ def pchint(x, y, x0):
     x0 : List[float]
         List of values to interpolate.
     x : List [float]
-        List of values in x axis used to perform interpolation
+        List of values in x axis used to perform interpolation.
     y : List[float]
-        List of values in y axis used to perform interpolation
+        List of values in y axis used to perform interpolation.
 
     Returns
     -------
-    y : List[float]
-        A list of interpolated values
+    F : List[float]
+        A list of interpolated values.
     """
 
     n = len(x)
@@ -149,7 +149,7 @@ def pchint(x, y, x0):
                 condition = alfa - ((2 * alfa + beta - 3) ** 2) / (alfa + beta - 2) / 3
     pos = 0
     c = 0
-    y = np.zeros(len(x0))
+    F = np.zeros(len(x0))
 
     for xi in x0:
         if xi > x[pos + 1]:
@@ -157,7 +157,7 @@ def pchint(x, y, x0):
 
         delta = x[pos + 1] - x[pos]
         t = (xi - x[pos]) / delta
-        y[c] = (
+        F[c] = (
             y[pos] * h00(t)
             + delta * m[pos] * h10(t)
             + y[pos + 1] * h01(t)
@@ -165,4 +165,4 @@ def pchint(x, y, x0):
         )
         c += 1
 
-    return y
+    return F
