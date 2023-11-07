@@ -2,26 +2,119 @@ import math
 
 import numpy as np
 
-
-def h00(t):
-    return 2 * t**3 - 3 * t**2 + 1
-
-
-def h10(t):
-    return t**3 - 2 * t**2 + t
-
-
-def h01(t):
-    return -2 * t**3 + 3 * t**2
+"""
+These are functions that are used to perform Hermite's 
+monotonic cubic interpolation.
+For more info check 
+https://en.wikipedia.org/wiki/Monotone_cubic_interpolation
+"""
 
 
-def h11(t):
-    return t**3 - t**2
+def h00(t: float) -> float:
+    """
+    First Hermite monotonic cubic interpolation polynomial.
+
+    Parameters
+    ----------
+    t : float
+        Independent variable.
+
+    Returns
+    ------
+    h00 : float
+        returns 2t^3 - 3t^2 + 1
+        evaluated at t.
+    """
+    f = 2 * t**3 - 3 * t**2 + 1
+
+    return f
 
 
+def h10(t: float) -> float:
+    """
+    Second Hermite monotonic cubic interpolation polynomial.
+
+    Parameters
+    ----------
+    t : float
+        Independent variable.
+
+    Returns
+    ------
+    f : float
+        returns t^3 - 2t^2 + t
+        evaluated at t.
+    """
+    f = t**3 - 2 * t**2 + t
+
+    return f
+
+
+def h01(t: float) -> float:
+    """
+    Third Hermite monotonic cubic interpolation polynomial.
+
+    Parameters
+    ----------
+    t : float
+        Independent variable.
+
+    Returns
+    ------
+    f : float
+        returns -2t^3 + 3t^2
+        evaluated at t.
+    """
+    f = -2 * t**3 + 3 * t**2
+
+    return f
+
+
+def h11(t: float) -> float:
+    """
+    Fourth Hermite monotonic cubic interpolation polynomial.
+
+    Parameters
+    ----------
+    t : float
+        Independent variable
+
+    Returns
+    -------
+    f : float
+        returns t^3 - t^2
+        evaluated at t
+    """
+    f = t**3 - t**2
+
+    return f
+
+
+# TODO: Complete docstring check numpy arrays type
 def pchint(x, y, x0):
+    """
+    An python code to implement Hermite monotonic cubic interpolation.
+
+    Parameters
+    ----------
+    x0 : List[float]
+        List of values to interpolate.
+    x : List [float]
+        List of values in x axis used to perform interpolation.
+    y : List[float]
+        List of values in y axis used to perform interpolation.
+
+    Returns
+    -------
+    F : List[float]
+        A list of interpolated values.
+    """
+
     n = len(x)
     d = np.zeros(n - 1)
+
+    # Calculating the first numerical derivatives
+    # store it in `d`
     for i in range(n - 1):
         d[i] = (y[i + 1] - y[i]) / (x[i + 1] - x[i])
 
@@ -45,15 +138,15 @@ def pchint(x, y, x0):
             alfa = m[i] / d[i]
             beta = m[i + 1] / d[i]
 
-            condicion = alfa - ((2 * alfa + beta - 3) ** 2) / (alfa + beta - 2) / 3
+            condition = alfa - ((2 * alfa + beta - 3) ** 2) / (alfa + beta - 2) / 3
 
-            while condicion < 0:
+            while condition < 0:
                 tau = 3 / math.sqrt(alfa**2 + beta**2)
                 alfa = tau * alfa
                 beta = tau * beta
                 m[i] = alfa * d[i]
                 m[i + 1] = beta * d[i]
-                condicion = alfa - ((2 * alfa + beta - 3) ** 2) / (alfa + beta - 2) / 3
+                condition = alfa - ((2 * alfa + beta - 3) ** 2) / (alfa + beta - 2) / 3
     pos = 0
     c = 0
     F = np.zeros(len(x0))
@@ -71,4 +164,5 @@ def pchint(x, y, x0):
             + delta * m[pos + 1] * h11(t)
         )
         c += 1
+
     return F
