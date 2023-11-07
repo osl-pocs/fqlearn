@@ -9,8 +9,10 @@ from utils.hermite import pchint
 
 class McCabeThiele:
     def __init__(self):
-        self.available_pair = [("methanol", "water"),
-                                ("hexano","xileno")]
+        """
+        Inicialize MCabeThiele class
+        """
+        self.available_pair = [("methanol", "water"), ("hexano", "xileno")]
 
     def set_data(self, compound_a, compound_b):
         if (compound_a, compound_b) in self.available_pair:
