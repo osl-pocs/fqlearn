@@ -9,7 +9,8 @@ from utils.hermite import pchint
 
 class McCabeThiele:
     def __init__(self):
-        self.available_pair = [("methanol", "water")]
+        self.available_pair = [("methanol", "water"),
+                                ("hexano","xileno")]
 
     def set_data(self, compound_a, compound_b):
         if (compound_a, compound_b) in self.available_pair:
@@ -126,8 +127,8 @@ class McCabeThiele:
         ax.plot(x_strip, y_strip, label="SOP")
         ax.plot(self.xe, self.ye, label="Steps")
         ax.set_title(f"Steps McCabe Thiele\n {self.compound_a}-{self.compound_b}")
-        ax.set_ylabel("y")
-        ax.set_xlabel("x")
+        ax.set_ylabel("molar composition y")
+        ax.set_xlabel("molar composition x")
         ax.set_xlim([0, 1])
         ax.set_ylim([0, 1])
         ax.grid()
