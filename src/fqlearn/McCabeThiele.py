@@ -12,6 +12,7 @@ class McCabeThiele:
         """
         Inicialize MCabeThiele class
         """
+
         self.available_pair = [
             ("methanol", "water"),
             ("ethanol", "water"),
