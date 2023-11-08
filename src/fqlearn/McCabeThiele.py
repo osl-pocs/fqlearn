@@ -12,7 +12,20 @@ class McCabeThiele:
         """
         Inicialize MCabeThiele class
         """
-        self.available_pair = [("methanol", "water"), ("hexano", "xileno")]
+
+        self.available_pair = [
+            ("methanol", "water"),
+            ("ethanol", "water"),
+            ("acetone", "chloroform"),
+            ("nitrogen", "oxygen"),
+            ("toluene", "xylene"),
+            ("hexane", "heptane"),
+            ("hexane", "xylene"),
+            ("ethylene", "ethylene_glycol"),
+            ("ammonia", "sulfur_dioxide"),
+            ("butanol", "ethyl_acetate"),
+            ("acetone", "methyl_isobutyl_ketone"),
+        ]
 
     def set_data(self, compound_a, compound_b):
         if (compound_a, compound_b) in self.available_pair:
