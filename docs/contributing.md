@@ -1,6 +1,11 @@
 # Contributing
----to complete
+
+This is a document to start contributing
+
+> We are champions
+
 ## PR Title Format
+
 ```
 <tag>(<scope>): <short summary>
   │       │             │
@@ -12,6 +17,11 @@
   └─> build|chore|ci|docs|feat|fix|perf|refactor|test
 ```
 
+```py
+def factorial():
+    pass
+```
+[link](google.com)
 
 ## Tags
 
