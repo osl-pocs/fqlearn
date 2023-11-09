@@ -1,5 +1,28 @@
 # Contributing
 
+```
+git checkout main # cambiar a la rama principal
+git fetch # actualiza referencias
+git pull # jalas los commits 
+
+git checkout -b <nueva-rama>
+
+# Hacer la modificaciones
+
+git add .
+git commit -m "mensaje"
+
+git rebase origin/main
+
+# resolver conflictos si existen
+
+git push
+
+# git push origin <nueva rama> # revisar
+
+git push --set-upstream origin nueva
+```
+
 This is a document to start contributing
 
 > We are champions
