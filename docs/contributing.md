@@ -23,6 +23,18 @@ git push
 git push --set-upstream origin nueva
 ```
 
+```bash
+# en el entorno virtual activado
+conda install jupyterlab
+# buscar en google si se tiene dudas acerca del paquete
+ejemple conda forge matplotlib
+# Es mejor instalarlo todo de una usando un archivo yaml
+conda env create -f <archivo yaml>
+
+# actualizar conda base
+conda update -n base -c defaults conda
+```
+
 This is a document to start contributing
 
 > We are champions
