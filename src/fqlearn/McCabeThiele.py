@@ -27,7 +27,29 @@ class McCabeThiele:
             ("acetone", "methyl_isobutyl_ketone"),
         ]
 
-    def set_data(self, compound_a, compound_b):
+    def set_data(self, compound_a: str, compound_b: str) -> None:
+        """
+        Description
+        -----------
+        This function open the the liquid vapor equilibrium data
+        for the two compounds compound_a and compound_b.
+
+        Parameters
+        ----------
+        compound_a : str
+                    Name of the compound_a, it is the most volatile
+        compound_b : str
+                    Name of the compound_b, it is the less volatile
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        If there is no matches for the compounds names, prints a message
+        indicating that there are no matches for the compounds names.
+        """
         if (compound_a, compound_b) in self.available_pair:
             self.compound_a = compound_a
             self.compound_b = compound_b
@@ -42,8 +64,32 @@ class McCabeThiele:
         else:
             print("There no available data for that pair compounds")
 
-    def eq_line(self, a, b):
-        return lambda x: a + b * x
+    def eq_line(self, a: float, b: float) -> callable:
+        """
+        Description
+        -----------
+        This function is used to return a new line function
+
+
+        Parameters
+        ---------
+        a : float
+            This value represents the slope of the new line.
+        b : float
+            This value represents the intersection with the y axis
+            and the new line.
+
+        Returns
+        -------
+        line : callable
+                A function that represents a line with
+                slope `a` and `b` as intersection in the `y` axis.
+        """
+
+        def line(x):
+            return a + b * x
+
+        return line
 
     def inter_vline(self, x, data_x, data_y):
         n = len(data_x)
