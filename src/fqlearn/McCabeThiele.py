@@ -2,6 +2,7 @@ import csv
 import os
 
 import matplotlib.pyplot as plt
+import pandas as pd
 import numpy as np
 
 from utils.hermite import pchint
