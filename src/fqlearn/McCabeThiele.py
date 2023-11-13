@@ -2,8 +2,8 @@ import csv
 import os
 
 import matplotlib.pyplot as plt
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from utils.hermite import pchint
 
@@ -54,16 +54,16 @@ class McCabeThiele:
         if (compound_a, compound_b) in self.available_pair:
             self.compound_a = compound_a
             self.compound_b = compound_b
-            self.x = []
-            self.y = []
-            print(os.getcwd())
-            with open("src/data/" f"{self.compound_a}-{self.compound_b}.csv") as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    self.x.append(float(row["x"]))
-                    self.y.append(float(row["y"]))
+            archivo_csv = f"src/data/{self.compound_a}-{self.compound_b}.csv"
+            
+            if os.path.exists(archivo_csv):
+                df = pd.read_csv(archivo_csv)
+                self.x = df["x"].tolist()
+                self.y = df["y"].tolist()
+            else:
+                print(f"No hay datos disponibles para el par de compuestos {compound_a}-{compound_b}")
         else:
-            print("There no available data for that pair compounds")
+            print("No hay datos disponibles para ese par de compuestos")
 
     def eq_line(self, a: float, b: float) -> callable:
         """
