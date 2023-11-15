@@ -1,4 +1,3 @@
-import csv
 import os
 
 import matplotlib.pyplot as plt
@@ -55,13 +54,15 @@ class McCabeThiele:
             self.compound_a = compound_a
             self.compound_b = compound_b
             archivo_csv = f"src/data/{self.compound_a}-{self.compound_b}.csv"
-            
+
             if os.path.exists(archivo_csv):
                 df = pd.read_csv(archivo_csv)
                 self.x = df["x"].tolist()
                 self.y = df["y"].tolist()
             else:
-                print(f"No hay datos disponibles para el par de compuestos {compound_a}-{compound_b}")
+                print(
+                    f"No hay datos disponibles para el par de compuestos {compound_a}-{compound_b}"
+                )
         else:
             print("No hay datos disponibles para ese par de compuestos")
 
@@ -92,6 +93,11 @@ class McCabeThiele:
 
         return line
 
+    def set_feed(self, q, xF):
+        if q == 1:
+            raise Exception('Not implemented yet') #To do list
+        return lambda x: q*x/(q-1) - xf/(q-1)
+    
     def inter_vline(self, x, data_x, data_y):
         n = len(data_x)
         i, j = 0, n - 1
@@ -176,12 +182,27 @@ class McCabeThiele:
 
         self.steps = etapas
 
+    def describe(self):
+        print('El reflujo mínimo es de: {}\n'
+            'El xW es de: {}\n'.format(self.Rmin, self.xW))
+
+        print('\nComposición de entrada y salida en cada etapa:')
+        for etapa in range(self.steps + 1):
+            x_in = self.xe[etapa]
+            y_out = self.ye[etapa]
+            print(f'Etapa {etapa + 1}: x_in = {x_in:.4f}, y_out = {y_out:.4f}')
+
+        print('\nNúmero total de etapas: {}'.format(self.steps))
+
+        
+    
     def plot(self):
         x_rect = np.linspace(self.xF, self.xD, 50)
         y_rect = np.array([self.line_recti(x) for x in x_rect])
         _, ax = plt.subplots()
         x_strip = np.linspace(self.xW, self.xF, 50)
         y_strip = np.array([self.line_strip(c) for c in x_strip])
+        
 
         ax.plot(self.x_data, self.y_data, label="Equilibrium")
         ax.plot([0, 1], [0, 1])
