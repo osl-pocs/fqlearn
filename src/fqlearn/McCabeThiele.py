@@ -3,6 +3,8 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from scipy.interpolate import interp1d
+from scipy.optimize import fsolve
 
 from utils.hermite import pchint
 
@@ -66,6 +68,16 @@ class McCabeThiele:
         else:
             print("No hay datos disponibles para ese par de compuestos")
 
+    def set_compositions(self, xD, xW):
+        """
+        xD (Composition at the destilate)
+        xW (Composition in the liquid)
+        """
+        # To Do: Validate inputs
+        self.xD = xD
+        self.xW = xW
+
+
     def eq_line(self, a: float, b: float) -> callable:
         """
         Description
@@ -92,26 +104,43 @@ class McCabeThiele:
             return a + b * x
 
         return line
-
+    
     def set_feed(self, q, xF):
+        """
+        This function stores feed values
+        q (relative heat)
+        xF (Feed composition)
+        """
+        # To Do: Validate inputs if
+        self.xF = xF
+        self.q = q
+
+        """
         if q == 1:
             raise Exception('Not implemented yet') #To do list
-        return lambda x: q*x/(q-1) - xf/(q-1)
-    
-    def inter_vline(self, x, data_x, data_y):
-        n = len(data_x)
-        i, j = 0, n - 1
-        while (j - i) >= 2:
-            m = (j + i) // 2
-            if data_x[m] > x:
-                j = m
-            else:
-                i = m
-        slope = (data_y[j] - data_y[i]) / (data_x[j] - data_x[i])
-        origin = -slope * data_x[i] + data_y[i]
-        line2 = self.eq_line(origin, slope)
-        return x, line2(x)
+        return lambda x: q*x/(q-1) - xF/(q-1) 
+        """
 
+    def interpolate_data(self):
+        self.x_data = np.linspace(self.x[0], self.x[-1], 100)
+        self.y_data = pchint(self.x, self.y, self.x_data)
+
+    def create_feed_line(self, q, xF):
+        """
+        Create feed line with q, xF
+        Store the function
+        Store feed method
+        """
+        if q == 1:
+            raise Exception("Not implemented yet")  # To do list
+        self.feed = lambda x: q * x / (q - 1) - xF / (q - 1)
+
+    def reflux_min(self, x_in, y_in, x_D):
+        k = (x_D - x_in) / (x_D - y_in)
+        R = 1 / (k - 1)
+        self.Rmin = R
+        return R
+    
     def inter_line(self, line, data_x, data_y):
         n = len(data_x)
         i, j = 0, n - 1
@@ -131,40 +160,36 @@ class McCabeThiele:
         x_in = f1 / (f1 - f2)
         y_in = line(x_in)
 
+
+
         return x_in, y_in
 
-    def reflux_min(self, x_in, y_in, x_D):
-        k = (x_D - x_in) / (x_D - y_in)
-        R = 1 / (k - 1)
-        self.Rmin = R
-        return R
-
-    def interpolate_data(self):
-        self.x_data = np.linspace(self.x[0], self.x[-1], 100)
-        self.y_data = pchint(self.x, self.y, self.x_data)
-
-    def fit(self, xF, xD, xW):
-        self.xF = xF
-        self.xD = xD
-        self.xW = xW
+    def solve(self):
+        """
+        Solve the system with the user inputs:
+        q, xF, xD, xW
+        """
         self.xe = []
         self.ye = []
         self.interpolate_data()
-        x_int, y_int = self.inter_vline(xF, self.x_data, self.y_data)
-        r_min = self.reflux_min(x_int, y_int, xD)
+        self.create_feed_line(self.q, self.xF)
+        # x_in y y_in punto de intersección con la curva de eq y feed
+        x_int, y_int = self.find_intersection()
+        self.x_int = x_int
+        self.y_int = y_int
+        r_min = self.reflux_min(x_int, y_int, self.xD)
         r = 1.5 * r_min
-
-        self.line_recti = self.eq_line(xD / (r + 1), r / (r + 1))
-        yF = self.line_recti(xF)
-        slope = (xW - yF) / (xW - xF)
-        origin = -slope * xF + yF
+        self.line_recti = self.eq_line(self.xD / (r + 1), r / (r + 1))
+        yF = self.line_recti(self.xF)
+        slope = (self.xW - yF) / (self.xW - self.xF)
+        origin = -slope * self.xF + yF
         self.line_strip = self.eq_line(origin, slope)
 
-        xp = xD
-        self.xe.append(xD)
-        self.ye.append(xD)
+        xp = self.xD
+        self.xe.append(self.xD)
+        self.ye.append(self.xD)
         etapas = 0
-        while xp > xW:
+        while xp > self.xW:
             line_xpn = self.eq_line(xp, 0)
             xpn, xp = self.inter_line(line_xpn, self.x_data, self.y_data)
 
@@ -172,7 +197,7 @@ class McCabeThiele:
             self.ye.append(xp)
             self.xe.append(xpn)
 
-            if xpn > xF:
+            if xpn > self.x_int:
                 xp = self.line_recti(xpn)
             else:
                 xp = self.line_strip(xpn)
@@ -182,20 +207,46 @@ class McCabeThiele:
 
         self.steps = etapas
 
+    def find_intersection(self, epsilon=1e-5):
+        def difference_function(x):
+            return self.y_data - self.feed(x)
+
+        # Verifica el cambio de signo para encontrar intervalos que contienen la intersección
+        sign_changes = np.where(np.diff(np.sign(difference_function(self.x_data))))[0]
+
+        if len(sign_changes) == 0:
+            return None
+
+        intersections = []
+
+        # Utiliza interpolación para encontrar la intersección en cada subintervalo
+        for i in sign_changes:
+            x_interval = self.x_data[i : i + 2]
+            y_interval = self.y_data[i : i + 2]
+            interpolator = interp1d(
+                x_interval, y_interval, kind="linear", fill_value="extrapolate"
+            )
+            intersection = fsolve(
+                lambda x: interpolator(x) - self.feed(x), np.mean(x_interval)
+            )
+            intersections.extend(intersection)
+
+        
+
+        return intersections[0], self.feed(np.array(intersections))[0]
+    
     def describe(self):
         print('El reflujo mínimo es de: {}\n'
-            'El xW es de: {}\n'.format(self.Rmin, self.xW))
+            'El composición líquida de salida: {}\n'.format(self.Rmin, self.xW))
 
         print('\nComposición de entrada y salida en cada etapa:')
         for etapa in range(self.steps + 1):
             x_in = self.xe[etapa]
             y_out = self.ye[etapa]
-            print(f'Etapa {etapa + 1}: x_in = {x_in:.4f}, y_out = {y_out:.4f}')
+            print(f'Etapa {etapa + 1}: Entrada = {x_in:.4f}, Salida = {y_out:.4f}')
 
         print('\nNúmero total de etapas: {}'.format(self.steps))
 
-        
-    
     def plot(self):
         x_rect = np.linspace(self.xF, self.xD, 50)
         y_rect = np.array([self.line_recti(x) for x in x_rect])
@@ -205,6 +256,7 @@ class McCabeThiele:
         
 
         ax.plot(self.x_data, self.y_data, label="Equilibrium")
+        ax.scatter(self.x_int, self.y_int, label = 'Intersección')
         ax.plot([0, 1], [0, 1])
         ax.plot(x_rect, y_rect, label="ROP")
         ax.plot(x_strip, y_strip, label="SOP")
