@@ -248,10 +248,10 @@ class McCabeThiele:
         print('\nNúmero total de etapas: {}'.format(self.steps))
 
     def plot(self):
-        x_rect = np.linspace(self.xF, self.xD, 50)
+        x_rect = np.linspace(self.x_int, self.xD, 50)
         y_rect = np.array([self.line_recti(x) for x in x_rect])
         _, ax = plt.subplots()
-        x_strip = np.linspace(self.xW, self.xF, 50)
+        x_strip = np.linspace(self.xW, self.x_int, 50)
         y_strip = np.array([self.line_strip(c) for c in x_strip])
         
 
