@@ -73,9 +73,14 @@ class McCabeThiele:
         xD (Composition at the destilate)
         xW (Composition in the liquid)
         """
-        # To Do: Validate inputs
-        self.xD = xD
-        self.xW = xW
+        if 0 <= xD <= 1 and 0 <= xW <= 1:
+            self.xD = xD
+            self.xW = xW
+        else:
+            print('Por favor, introduce solo valores válidos\n'
+                  'Revisa los valores introducidos\n'
+                  'xD = {}\n'
+                  'xW = {}'.format(xD, xW))
 
 
     def eq_line(self, a: float, b: float) -> callable:
