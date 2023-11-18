@@ -111,9 +111,15 @@ class McCabeThiele:
         q (relative heat)
         xF (Feed composition)
         """
-        # To Do: Validate inputs if
-        self.xF = xF
-        self.q = q
+        if 0 <= q <= 1 and 0 <= xF <= 1:
+            self.xF = xF
+            self.q = q
+        else:
+            print('Por favor, introduce solo valores válidos\n'
+                  'Revisa los valores introducidos\n'
+                  'q = {}\n'
+                  'xF = {}'.format(q, xF))
+
 
         """
         if q == 1:
@@ -136,6 +142,9 @@ class McCabeThiele:
         self.feed = lambda x: q * x / (q - 1) - xF / (q - 1)
 
     def reflux_min(self, x_in, y_in, x_D):
+        """
+        This function calculate reflux
+        """
         k = (x_D - x_in) / (x_D - y_in)
         R = 1 / (k - 1)
         self.Rmin = R
@@ -193,6 +202,7 @@ class McCabeThiele:
             line_xpn = self.eq_line(xp, 0)
             xpn, xp = self.inter_line(line_xpn, self.x_data, self.y_data)
 
+
             etapas += 1
             self.ye.append(xp)
             self.xe.append(xpn)
@@ -246,6 +256,7 @@ class McCabeThiele:
             print(f'Etapa {etapa + 1}: Entrada = {x_in:.4f}, Salida = {y_out:.4f}')
 
         print('\nNúmero total de etapas: {}'.format(self.steps))
+
 
     def plot(self):
         x_rect = np.linspace(self.x_int, self.xD, 50)
