@@ -11,10 +11,6 @@ from utils.hermite import pchint
 
 class McCabeThiele:
     def __init__(self):
-        """
-        Inicialize MCabeThiele class
-        """
-
         self.available_pair = [
             ("methanol", "water"),
             ("ethanol", "water"),
@@ -28,13 +24,30 @@ class McCabeThiele:
             ("butanol", "ethyl_acetate"),
             ("acetone", "methyl_isobutyl_ketone"),
         ]
+        self.compound_a = None
+        self.compound_b = None
+
+    def volarel(self, alfa, compuesto1, compuesto2):
+        x = np.arange(0, 1.1, 0.1)
+        y = []
+
+        for i in range(len(x)):
+            o = (alfa * x[i]) / (1 + x[i] * (alfa - 1))
+            y.append(o)
+
+        data = {'x': x, 'y': y}
+        df = pd.DataFrame(data)
+
+        nombre_archivo = f"src/data/{compuesto1}-{compuesto2}.csv"
+
+        df.to_csv(nombre_archivo, index=False)
+
+        print(f"Datos guardados en {nombre_archivo}")
+        return nombre_archivo
 
     def set_data(self, compound_a: str, compound_b: str) -> None:
         """
-        Description
-        -----------
-        This function open the the liquid vapor equilibrium data
-        for the two compounds compound_a and compound_b.
+        Open the liquid-vapor equilibrium data for the two compounds compound_a and compound_b.
 
         Parameters
         ----------
@@ -49,8 +62,7 @@ class McCabeThiele:
 
         Notes
         -----
-        If there is no matches for the compounds names, prints a message
-        indicating that there are no matches for the compounds names.
+        If there is no matches for the compounds names, prints a message indicating that there are no matches for the compounds names.
         """
         if (compound_a, compound_b) in self.available_pair:
             self.compound_a = compound_a
@@ -63,10 +75,28 @@ class McCabeThiele:
                 self.y = df["y"].tolist()
             else:
                 print(
-                    f"No hay datos disponibles para el par de compuestos {compound_a}-{compound_b}"
+                    f"No hay datos disponibles para el par de compuestos {self.compound_a}-{self.compound_b}"
                 )
+                alfa = int(input('Alfa = '))
+                self.alfa = alfa
+                nuevo_archivo = self.volarel(alfa, self.compound_a, self.compound_b)
+                df = pd.read_csv(nuevo_archivo)
+                self.x = df["x"].tolist()
+                self.y = df["y"].tolist()
         else:
-            print("No hay datos disponibles para ese par de compuestos")
+            print("No hay datos disponibles para ese par de compuestos\n"
+                  "¿Deseas usar el índice de volatilidad relativa?")
+            answ = int(input('1. YES\n2. NO\n'))
+            if answ == 1:
+                alfa = int(input('Alfa = '))
+                self.alfa = alfa
+
+                nuevo_archivo = self.volarel(alfa, compound_a, compound_b)
+                df = pd.read_csv(nuevo_archivo)
+                self.x = df["x"].tolist()
+                self.y = df["y"].tolist()
+                self.compound_a = compound_a
+                self.compound_b = compound_b
 
     def set_compositions(self, xD, xW):
         """
@@ -272,7 +302,7 @@ class McCabeThiele:
         
 
         ax.plot(self.x_data, self.y_data, label="Equilibrium")
-        ax.scatter(self.x_int, self.y_int, label = 'Intersección')
+        ax.scatter(self.x_int, self.y_int, marker = '*', c = 'red',label = 'Intersección')
         ax.plot([0, 1], [0, 1])
         ax.plot(x_rect, y_rect, label="ROP")
         ax.plot(x_strip, y_strip, label="SOP")
