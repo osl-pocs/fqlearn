@@ -6,7 +6,6 @@ model.set_data(compound_a="compuestoA", compound_b="compuestoB")
 model.set_compositions(xD=0.94, xW=0.05)
 model.set_feed(q=0.5, xF=0.5)
 model.solve()
-#model.steps()
 model.describe()
 model.plot()
 

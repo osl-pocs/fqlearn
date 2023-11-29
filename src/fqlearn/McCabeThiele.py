@@ -205,7 +205,6 @@ class McCabeThiele:
         y_in = line(x_in)
 
 
-
         return x_in, y_in
 
     def solve(self):
