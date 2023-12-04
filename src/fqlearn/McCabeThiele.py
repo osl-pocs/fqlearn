@@ -53,7 +53,7 @@ class McCabeThiele:
         ----------
         compound_a : str
                     Name of the compound_a, it is the most volatile
-        compound_b : str
+        compound_gib : str
                     Name of the compound_b, it is the less volatile
 
         Returns
@@ -77,7 +77,7 @@ class McCabeThiele:
                 print(
                     f"No hay datos disponibles para el par de compuestos {self.compound_a}-{self.compound_b}"
                 )
-                alfa = int(input('Alfa = '))
+                alfa = float(input('Alfa = '))
                 self.alfa = alfa
                 nuevo_archivo = self.volarel(alfa, self.compound_a, self.compound_b)
                 df = pd.read_csv(nuevo_archivo)
@@ -88,7 +88,7 @@ class McCabeThiele:
                   "¿Deseas usar el índice de volatilidad relativa?")
             answ = int(input('1. YES\n2. NO\n'))
             if answ == 1:
-                alfa = int(input('Alfa = '))
+                alfa = float(input('Alfa = '))
                 self.alfa = alfa
 
                 nuevo_archivo = self.volarel(alfa, compound_a, compound_b)
