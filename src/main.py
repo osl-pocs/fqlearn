@@ -2,7 +2,7 @@ from fqlearn import McCabeThiele
 
 model = McCabeThiele()
 
-model.set_data(compound_a="compuestoA", compound_b="compuestoB")
+model.set_data(compound_a="methanol", compound_b="water")
 model.set_compositions(xD=0.94, xW=0.05)
 model.set_feed(q=0.5, xF=0.5)
 model.solve()
@@ -16,18 +16,3 @@ model2.set_feed(q=0.5, xF=0.5)
 model2.solve()
 model2.describe()
 model2.plot()"""
-
-
-
-def find_intersection(a, b):
-    if a + 1 == b:
-        return a, b
-
-    m = (a+b)//2
-    signal_change = (y_values[m]-feed(x_values[m]))*(y_values[a]-feed(x_values[a]))
-    if signal_change < 0:
-        b = m
-    else:
-        a = m
-        
-    return find_intersection(a,b)    

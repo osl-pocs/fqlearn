@@ -222,10 +222,20 @@ class McCabeThiele:
         xD = self.xD
         def _create_rect_line(x):
             return (r*x+xD)/(r+1)
-        self.rect_line = _create_rect_line()
+        self.rect_line = _create_rect_line
+    
+    def line_intersection(self, line1, line2):
+        x = (line1(0)-line2(0))/(line1(0)-line2(0)-line1(1)+line2(1))
+        return x, line2(x)
 
     def create_strip_line(self):
-        ...
+        # Rename x,y, these are intersection points rect line and feed line
+        x, y = self.line_intersection(self.feed, self.rect_line)
+        slope = (self.xW - y) / (self.xW - x)
+        origin = -slope * x + y
+        self.rx_int = x
+        self.ry_int = y
+        self.strip_line = self.eq_line(origin, slope)
 
     def solve(self):
         """
@@ -252,49 +262,58 @@ class McCabeThiele:
         
         self.create_strip_line()
 
-        slope = (self.xW - self.yF) / (self.xW - self.xF)
-        origin = -slope * self.xF + self.yF
-        self.line_strip = self.eq_line(origin, slope)
-
         xp = self.xD
         self.xe.append(self.xD)
         self.ye.append(self.xD)
-        etapas = 0
+        steps = 0
+
         while xp > self.xW:
             line_xpn = self.eq_line(xp, 0)
             xpn, xp = self.inter_line(line_xpn, self.x_data, self.y_data)
 
-
-            etapas += 1
+            steps += 1
             self.ye.append(xp)
             self.xe.append(xpn)
 
-            if xpn > self.x_int:
-                xp = self.line_recti(xpn)
+            if xpn > self.rx_int:
+                xp = self.rect_line(xpn)
             else:
-                xp = self.line_strip(xpn)
+                xp = self.strip_line(xpn)
 
             self.ye.append(xp)
             self.xe.append(xpn)
 
-        self.steps = etapas
+        self.steps = steps
 
     def find_intersection(self):
         a = 0
         b = len(self.x_data)
 
-        def _find_intersection(a,b):
+        def _find_intersection(a, b):
             if a + 1 == b:
                 return a, b
             m = (a+b)//2
             signal_change = (self.y_data[m]-self.feed(self.x_data[m]))*(self.y_data[a]-self.feed(self.x_data[a]))
-
+            
             if signal_change < 0:
                 b = m
             else:
                 a = m
-                return _find_intersection(a, b)
-        return _find_intersection(a, b)
+
+            return _find_intersection(a, b)
+        
+        def intersection(line, x1,y1,x2,y2):
+            x = x1 + (y1 - line(x1))*(x2 - x1)/(line(x2) - line(x1) - y2 + y1)
+            return x, line(x)
+        
+        print(_find_intersection(a, b))
+        ida, idb = _find_intersection(a, b)
+        x1, y1 =  self.x_data[ida], self.y_data[ida]
+        x2, y2 = self.x_data[idb], self.y_data[idb]
+
+        x_int, y_int = intersection(self.feed, x1,y1,x2,y2)
+
+        return x_int, y_int
     
     def describe(self):
         print('El reflujo mínimo es de: {}\n'
@@ -310,13 +329,12 @@ class McCabeThiele:
 
 
     def plot(self):
-        x_rect = np.linspace(self.x_int, self.xD, 50)
-        y_rect = np.array([self.line_recti(x) for x in x_rect])
+        x_rect = np.linspace(self.rx_int, self.xD, 50)
+        y_rect = np.array([self.rect_line(x) for x in x_rect])
         _, ax = plt.subplots()
-        x_strip = np.linspace(self.xW, self.x_int, 50)
-        y_strip = np.array([self.line_strip(c) for c in x_strip])
+        x_strip = np.linspace(self.xW, self.rx_int, 50)
+        y_strip = np.array([self.strip_line(c) for c in x_strip])
         
-
         ax.plot(self.x_data, self.y_data, label="Equilibrium")
         ax.scatter(self.x_int, self.y_int, marker = '*', c = 'red',label = 'Intersección')
         ax.plot([0, 1], [0, 1])
