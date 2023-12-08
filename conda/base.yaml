@@ -3,18 +3,12 @@ channels:
   - nodefaults
   - conda-forge
 dependencies:
-  # - jupyterlab
   - python 3.10
   - poetry
   - pytest
-  #- matplotlib
-  # - numpy
-  # - pandas
-  # - black
   - isort
   - pre-commit
   - pip
-  # - vulture
   - pip:
     - makim==1.8.2
     

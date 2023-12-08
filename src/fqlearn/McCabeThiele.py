@@ -28,6 +28,10 @@ class McCabeThiele:
         self.compound_b = None
 
     def volarel(self, alfa, compuesto1, compuesto2):
+        """
+        Redefine this function if there and volatility value
+        there is no need the create a table
+        """
         x = np.arange(0, 1.1, 0.1)
         y = []
 
@@ -64,6 +68,9 @@ class McCabeThiele:
         -----
         If there is no matches for the compounds names, prints a message indicating that there are no matches for the compounds names.
         """
+
+        #TODO: Use volatity as an input variable for the function
+        # instead of asking in the command terminal
         if (compound_a, compound_b) in self.available_pair:
             self.compound_a = compound_a
             self.compound_b = compound_b
@@ -100,9 +107,11 @@ class McCabeThiele:
 
     def set_compositions(self, xD, xW):
         """
-        xD (Composition at the destilate)
+        xD (Composition at the distilate)
         xW (Composition in the liquid)
         """
+
+        # TODO: Change language messages to english
         if 0 <= xD <= 1 and 0 <= xW <= 1:
             self.xD = xD
             self.xW = xW
@@ -155,7 +164,7 @@ class McCabeThiele:
                   'q = {}\n'
                   'xF = {}'.format(q, xF))
 
-
+        # TODO: Change language messages to english
         """
         if q == 1:
             raise Exception('Not implemented yet') #To do list
@@ -173,6 +182,7 @@ class McCabeThiele:
         Store feed method
         """
         if q == 1:
+            #TODO: implement when q == 1
             raise Exception("Not implemented yet")  # To do list
         self.feed = lambda x: q * x / (q - 1) - xF / (q - 1)
 
@@ -186,6 +196,7 @@ class McCabeThiele:
         return R
     
     def inter_line(self, line, data_x, data_y):
+        #TODO: Refactor this code make it better
         n = len(data_x)
         i, j = 0, n - 1
 
@@ -204,80 +215,105 @@ class McCabeThiele:
         x_in = f1 / (f1 - f2)
         y_in = line(x_in)
 
-
         return x_in, y_in
+
+    def create_rect_line(self):
+        r =self.r
+        xD = self.xD
+        def _create_rect_line(x):
+            return (r*x+xD)/(r+1)
+        self.rect_line = _create_rect_line
+    
+    def line_intersection(self, line1, line2):
+        x = (line1(0)-line2(0))/(line1(0)-line2(0)-line1(1)+line2(1))
+        return x, line2(x)
+
+    def create_strip_line(self):
+        # Rename x,y, these are intersection points rect line and feed line
+        x, y = self.line_intersection(self.feed, self.rect_line)
+        slope = (self.xW - y) / (self.xW - x)
+        origin = -slope * x + y
+        self.rx_int = x
+        self.ry_int = y
+        self.strip_line = self.eq_line(origin, slope)
 
     def solve(self):
         """
         Solve the system with the user inputs:
         q, xF, xD, xW
         """
+        # xe, ye stores the values of the ladder
         self.xe = []
         self.ye = []
+        
         self.interpolate_data()
         self.create_feed_line(self.q, self.xF)
         # x_in y y_in punto de intersección con la curva de eq y feed
         x_int, y_int = self.find_intersection()
         self.x_int = x_int
         self.y_int = y_int
-        r_min = self.reflux_min(x_int, y_int, self.xD)
-        r = 1.5 * r_min
-        self.line_recti = self.eq_line(self.xD / (r + 1), r / (r + 1))
-        yF = self.line_recti(self.xF)
-        slope = (self.xW - yF) / (self.xW - self.xF)
-        origin = -slope * self.xF + yF
-        self.line_strip = self.eq_line(origin, slope)
+
+        self.r_min = self.reflux_min(x_int, y_int, self.xD)
+        self.r = 1.5 * self.r_min
+
+        self.create_rect_line()
+
+        self.yF = self.rect_line(self.xF)
+        
+        self.create_strip_line()
 
         xp = self.xD
         self.xe.append(self.xD)
         self.ye.append(self.xD)
-        etapas = 0
+        steps = 0
+
         while xp > self.xW:
             line_xpn = self.eq_line(xp, 0)
             xpn, xp = self.inter_line(line_xpn, self.x_data, self.y_data)
 
-
-            etapas += 1
+            steps += 1
             self.ye.append(xp)
             self.xe.append(xpn)
 
-            if xpn > self.x_int:
-                xp = self.line_recti(xpn)
+            if xpn > self.rx_int:
+                xp = self.rect_line(xpn)
             else:
-                xp = self.line_strip(xpn)
+                xp = self.strip_line(xpn)
 
             self.ye.append(xp)
             self.xe.append(xpn)
 
-        self.steps = etapas
+        self.steps = steps
 
-    def find_intersection(self, epsilon=1e-5):
-        def difference_function(x):
-            return self.y_data - self.feed(x)
+    def find_intersection(self):
+        a = 0
+        b = len(self.x_data)
 
-        # Verifica el cambio de signo para encontrar intervalos que contienen la intersección
-        sign_changes = np.where(np.diff(np.sign(difference_function(self.x_data))))[0]
+        def _find_intersection(a, b):
+            if a + 1 == b:
+                return a, b
+            m = (a+b)//2
+            signal_change = (self.y_data[m]-self.feed(self.x_data[m]))*(self.y_data[a]-self.feed(self.x_data[a]))
+            
+            if signal_change < 0:
+                b = m
+            else:
+                a = m
 
-        if len(sign_changes) == 0:
-            return None
-
-        intersections = []
-
-        # Utiliza interpolación para encontrar la intersección en cada subintervalo
-        for i in sign_changes:
-            x_interval = self.x_data[i : i + 2]
-            y_interval = self.y_data[i : i + 2]
-            interpolator = interp1d(
-                x_interval, y_interval, kind="linear", fill_value="extrapolate"
-            )
-            intersection = fsolve(
-                lambda x: interpolator(x) - self.feed(x), np.mean(x_interval)
-            )
-            intersections.extend(intersection)
-
+            return _find_intersection(a, b)
         
+        def intersection(line, x1,y1,x2,y2):
+            x = x1 + (y1 - line(x1))*(x2 - x1)/(line(x2) - line(x1) - y2 + y1)
+            return x, line(x)
+        
+        print(_find_intersection(a, b))
+        ida, idb = _find_intersection(a, b)
+        x1, y1 =  self.x_data[ida], self.y_data[ida]
+        x2, y2 = self.x_data[idb], self.y_data[idb]
 
-        return intersections[0], self.feed(np.array(intersections))[0]
+        x_int, y_int = intersection(self.feed, x1,y1,x2,y2)
+
+        return x_int, y_int
     
     def describe(self):
         print('El reflujo mínimo es de: {}\n'
@@ -293,13 +329,12 @@ class McCabeThiele:
 
 
     def plot(self):
-        x_rect = np.linspace(self.x_int, self.xD, 50)
-        y_rect = np.array([self.line_recti(x) for x in x_rect])
+        x_rect = np.linspace(self.rx_int, self.xD, 50)
+        y_rect = np.array([self.rect_line(x) for x in x_rect])
         _, ax = plt.subplots()
-        x_strip = np.linspace(self.xW, self.x_int, 50)
-        y_strip = np.array([self.line_strip(c) for c in x_strip])
+        x_strip = np.linspace(self.xW, self.rx_int, 50)
+        y_strip = np.array([self.strip_line(c) for c in x_strip])
         
-
         ax.plot(self.x_data, self.y_data, label="Equilibrium")
         ax.scatter(self.x_int, self.y_int, marker = '*', c = 'red',label = 'Intersección')
         ax.plot([0, 1], [0, 1])

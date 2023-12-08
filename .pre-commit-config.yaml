@@ -8,13 +8,13 @@ repos:
 
   - repo: local
     hooks:
-    - entry: black
-      id: black
-      name: black
-      language: system
-      pass_filenames: true
-      types:
-        - python
+    # - entry: black
+    #   id: black
+    #   name: black
+    #   language: system
+    #   pass_filenames: true
+    #   types:
+    #     - python
 
     - id: isort
       entry: isort

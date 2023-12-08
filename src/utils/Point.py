@@ -68,4 +68,3 @@ class Point:
         plt.show()
 
         return (intersections, feed(np.array(intersections)))
-
