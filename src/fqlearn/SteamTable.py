@@ -5,9 +5,13 @@ from mpl_toolkits.mplot3d import Axes3D
 
 class SteamTable:
     def __init__(self):
+        """
+        Initializes the SteamTable class by reading data from the CSV file and
+        converting columns to numeric types.
+        """
         self.table_data = pd.read_csv('src/data/tabla1-Saturation-Temperature.csv')
 
-        # Convertir columnas a tipos numéricos
+        # Convert columns to numeric types
         self.table_data['p'] = self.table_data['p'].str.replace(' ', '').astype(float)
         self.table_data['vV'] = self.table_data['vV'].str.replace(' ', '').astype(float)
         self.table_data['vL'] = self.table_data['vL'].str.replace(' ', '').astype(float)
@@ -15,7 +19,7 @@ class SteamTable:
         self.table_data['vV'] = pd.to_numeric(self.table_data['vV'], errors='coerce')
         self.table_data['vL'] = pd.to_numeric(self.table_data['vL'], errors='coerce')
 
-        # Crear arrays
+        # Create arrays
         self.t = np.array(self.table_data['t'])
         self.p = np.array(self.table_data['p'])
         self.vv = np.array(self.table_data['vV'])
@@ -24,38 +28,48 @@ class SteamTable:
         self.ds = np.array(self.table_data['delta_s'])
 
     def data(self):
+        """
+        Prints data in the table in chunks of 20 rows.
+        """
         for i in range(0, len(self.table_data), 20):
             print(self.table_data.iloc[i:i+20])
 
     def plot(self, variable):
-        #plt.style.use('seaborn-darkgrid')  # Estilo consistente
-
+        """
+        Plots different diagrams based on the specified variable: PV, PT, or TV.
+        """
         if variable == 'PV':
+            # PV Diagram
             plt.plot(self.p, self.vv, label='Steam', color='blue')
             plt.plot(self.p, self.vl, '--', label='Liquid', color='green')
             plt.xlabel('Pressure (units)')
             plt.ylabel('Volume (units)')
             plt.title('PV Diagram')
-            plt.legend(loc='upper right')  
+            plt.legend(loc='upper right')
             plt.show()
         elif variable == 'PT':
+            # PT Diagram
             plt.plot(self.p, self.t)
             plt.xlabel('Pressure (units)')
             plt.ylabel('Temperature (units)')
             plt.title('PT Diagram')
             plt.show()
         elif variable == 'TV':
+            # TV Diagram
             plt.plot(self.t, self.vv, label='Steam', color='blue')
             plt.plot(self.t, self.vl, '--', label='Liquid', color='green')
             plt.xlabel('Temperature (units)')
             plt.ylabel('Volume (units)')
             plt.title('TV Diagram')
-            plt.legend(loc='upper right')  
+            plt.legend(loc='upper right')
             plt.show()
         else:
             print("Variable not recognized. Supported variables: PV, PT, TV")
 
     def plot3d(self):
+        """
+        Plots a 3D diagram based on pressure, temperature, and volume.
+        """
         fig = plt.figure(dpi=200)
         ax = fig.add_subplot(111, projection='3d')
         ax.scatter(self.p, self.t, self.vv, label='Steam', color='blue')
@@ -71,10 +85,10 @@ class SteamTable:
 class State:
     def __init__(self, p=None, T=None):
         """
-        Inicializa la clase State con la presión (p) y temperatura (T) especificadas.
+        Initializes the State class with specified pressure (p) and temperature (T).
         """
 
     def __call__(self, x=None):
         """
-        Permite llamar a la instancia de la clase State con un valor opcional x.
+        Allows calling the State class instance with an optional value x.
         """
