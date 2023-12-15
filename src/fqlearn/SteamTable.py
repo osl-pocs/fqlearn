@@ -122,4 +122,3 @@ class SteamTable:
         ax.legend()
         plt.show()
 
-
