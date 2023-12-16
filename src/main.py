@@ -1,5 +1,6 @@
 from fqlearn.McCabeThiele import McCabeThiele
 from fqlearn.SteamTable import SteamTable
+
 """
 model = McCabeThiele()
 
@@ -18,3 +19,5 @@ sistema.plot('PV')
 sistema.plot('PT')
 sistema.plot('TV')
 sistema.plot3d()
+
+sistema.point(t = 100)

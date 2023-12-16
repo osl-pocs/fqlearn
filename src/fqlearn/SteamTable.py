@@ -34,6 +34,47 @@ class SteamTable:
         for i in range(0, len(self.table_data), 20):
             print(self.table_data.iloc[i:i+20])
 
+    def point(self, t):
+        """
+        Prints the variables at a specific temperature.
+        """
+        indice_temperatura = np.where(self.table_data['t'] == t)[0]
+
+        if len(indice_temperatura) > 0:
+            # Si se encuentra la temperatura en la tabla, obtenemos el índice correspondiente
+            indice_temperatura = indice_temperatura[0]
+
+            # Obtener los valores de las variables
+            p = self.table_data.loc[indice_temperatura, 'p']
+            rhoL = self.table_data.loc[indice_temperatura, 'rhoL']
+            rhoV = self.table_data.loc[indice_temperatura, 'rhoV']
+            hL = self.table_data.loc[indice_temperatura, 'hL']
+            hV = self.table_data.loc[indice_temperatura, 'hV']
+            delta_h = self.table_data.loc[indice_temperatura, 'delta_h']
+            sL = self.table_data.loc[indice_temperatura, 'sL']
+            sV = self.table_data.loc[indice_temperatura, 'sV']
+            delta_s = self.table_data.loc[indice_temperatura, 'delta_s']
+            vL = self.table_data.loc[indice_temperatura, 'vL']
+            vV = self.table_data.loc[indice_temperatura, 'vV']
+
+            # Imprimir las variables
+            print('Datos del punto requerido')
+            print('Temperatura = {}[ºC]'.format(t))
+            print('p = {}[MPa]'.format(p))
+            print('rhoL = {}[kg/m^3]'.format(rhoL))
+            print('rhoV = {}[kg/m^3]'.format(rhoV))
+            print('hL = {}[KJ/kg]'.format(hL))
+            print('hV = {}[KJ/kg]'.format(hV))
+            print('delta_h = {}[KJ/kg]'.format(delta_h))
+            print('sL = {}[KJ/(kg·K)]'.format(sL))
+            print('sV = {}[KJ/(kg·K)]'.format(sV))
+            print('delta_s = {}[KJ/(kg·K)]'.format(delta_s))
+            print('vL = {}[cm^3/g]'.format(vL))
+            print('vV = {}[cm^3/g]'.format(vV))
+        else:
+            print('No se encontró la temperatura {} en la tabla'.format(t))
+            # Aquí se implementara una regresión para buscar el punto deseado
+
     def plot(self, variable):
         """
         Plots different diagrams based on the specified variable: PV, PT, or TV.
@@ -81,14 +122,3 @@ class SteamTable:
         ax.legend()
         plt.show()
 
-
-class State:
-    def __init__(self, p=None, T=None):
-        """
-        Initializes the State class with specified pressure (p) and temperature (T).
-        """
-
-    def __call__(self, x=None):
-        """
-        Allows calling the State class instance with an optional value x.
-        """
