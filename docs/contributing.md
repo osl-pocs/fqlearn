@@ -18,8 +18,6 @@ If you are reporting a bug, please include:
     troubleshooting.
   - Detailed steps to reproduce the bug.
 
-
-
 ### Submit Feedback
 
 The best way to send feedback is to file an issue at

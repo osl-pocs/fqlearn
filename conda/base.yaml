@@ -9,6 +9,8 @@ dependencies:
   - isort
   - pre-commit
   - pip
-  - pip:
-    - makim==1.8.2
+  - mkdocs
+  - mkdocs-material
+    #- pip:
+    # - makim==1.8.2
     

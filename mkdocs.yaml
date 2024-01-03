@@ -1,0 +1,26 @@
+site_name: fqlearn
+
+nav:
+  - Home: index.md 
+  - McCabeThiele module: mcthiele-module.md 
+  - About: about.md 
+  - Contributing: contributing.md 
+
+theme: 
+  name: material
+  palette:
+    primary: blue
+
+repo_url: https://github.com/osl-pocs/fqlearn
+
+markdown_extensions:
+  - pymdownx.arithmatex:
+      generic: true
+
+extra_javascript:
+  - javascripts/katex.js 
+  - https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.js  
+  - https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/contrib/auto-render.min.js
+
+extra_css:
+  - https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.css
