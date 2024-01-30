@@ -1,7 +1,6 @@
 from fqlearn.McCabeThiele import McCabeThiele
 from fqlearn.SteamTable import SteamTable
 
-"""
 model = McCabeThiele()
 
 model.set_data(compound_a="methanol", compound_b="water")
@@ -10,14 +9,14 @@ model.set_feed(q=0.5, xF=0.5)
 model.solve()
 model.describe()
 model.plot()
-"""
 
-sistema = SteamTable()
 
-sistema.data()
-sistema.plot('PV')
-sistema.plot('PT')
-sistema.plot('TV')
-sistema.plot3d()
+# sistema = SteamTable()
 
-sistema.point(t = 100)
+# sistema.data()
+# sistema.plot('PV')
+# sistema.plot('PT')
+# sistema.plot('TV')
+# sistema.plot3d()
+
+# sistema.point(t = 100)

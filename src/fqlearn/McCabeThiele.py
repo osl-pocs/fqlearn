@@ -316,16 +316,16 @@ class McCabeThiele:
         return x_int, y_int
     
     def describe(self):
-        print('El reflujo mínimo es de: {}\n'
-            'El composición líquida de salida: {}\n'.format(self.Rmin, self.xW))
+        print('Min Reflux: {}\n'
+            'Composition at the bottom: {}\n'.format(self.Rmin, self.xW))
 
         print('\nComposición de entrada y salida en cada etapa:')
         for etapa in range(self.steps + 1):
             x_in = self.xe[etapa]
             y_out = self.ye[etapa]
-            print(f'Etapa {etapa + 1}: Entrada = {x_in:.4f}, Salida = {y_out:.4f}')
+            print(f'Step {etapa + 1}: x={x_in:.4f}, y= {y_out:.4f}')
 
-        print('\nNúmero total de etapas: {}'.format(self.steps))
+        print('\nTotal Steps: {}'.format(self.steps))
 
 
     def plot(self):
@@ -336,7 +336,7 @@ class McCabeThiele:
         y_strip = np.array([self.strip_line(c) for c in x_strip])
         
         ax.plot(self.x_data, self.y_data, label="Equilibrium")
-        ax.scatter(self.x_int, self.y_int, marker = '*', c = 'red',label = 'Intersección')
+        #ax.scatter(self.x_int, self.y_int, marker = '*', c = 'red',label = 'Intersection')
         ax.plot([0, 1], [0, 1])
         ax.plot(x_rect, y_rect, label="ROP")
         ax.plot(x_strip, y_strip, label="SOP")
