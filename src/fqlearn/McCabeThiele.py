@@ -69,7 +69,7 @@ class McCabeThiele:
         If there is no matches for the compounds names, prints a message indicating that there are no matches for the compounds names.
         """
 
-        #TODO: Use volatity as an input variable for the function
+        #TODO: Use volatility as an input variable for the function
         # instead of asking in the command terminal
         if (compound_a, compound_b) in self.available_pair:
             self.compound_a = compound_a
