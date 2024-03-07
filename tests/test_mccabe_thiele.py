@@ -2,6 +2,6 @@ from fqlearn import McCabeThiele
 
 
 def test_binary():
-    modelo = McCabeThiele()
-    modelo.set_data("methanol", "water")
-    assert modelo.compound_a == "methanol"
+    model = McCabeThiele()
+    model.set_data("methanol", "water")
+    assert model.compound_a == "methanol"
