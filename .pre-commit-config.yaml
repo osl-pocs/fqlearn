@@ -6,8 +6,8 @@ repos:
     hooks:
       - id: end-of-file-fixer
 
-  - repo: local
-    hooks:
+  # - repo: local
+  #   hooks:
     # - entry: black
     #   id: black
     #   name: black
@@ -16,13 +16,13 @@ repos:
     #   types:
     #     - python
 
-    - id: isort
-      entry: isort
-      name: isort
-      language: system
-      pass_filenames: true
-      types:
-        - python
+    # - id: isort
+    #   entry: isort
+    #   name: isort
+    #   language: system
+    #   pass_filenames: true
+    #   types:
+    #     - python
 
 # Implement this with the new tests
     # - id: vulture
