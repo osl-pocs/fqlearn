@@ -26,7 +26,8 @@ class ThreeComponent:
         self.tax.ticks(axis='lbr', linewidth=1, multiple=10, offset=0.02)
 
         self.tax.set_background_color(color="whitesmoke", alpha=0.7) # the default, essentially
-       
+
+    # To add points to the plot   
     def add_points(self, points):
         # Check if points is a list of lists or a single list
         if isinstance(points[0], (int, float)):  # Check if the first element of points is a number
@@ -40,13 +41,27 @@ class ThreeComponent:
         self.tax.scatter(points, marker='s', color='blue')
         return points
     
-    # To plot equilibrium line
+    # To plot equilibrium line joining the points
     def eq_line(self, points):
         self.add_points(points)
         self.tax.plot(points, linewidth=2.0, label="Equilibrium line")
         self.tax.legend()
         self.tax.show()
 
+    # Join the corresponding points of 2 solutes
+    def solute_points(self, soluteA, soluteB):
+        for i in range(len(soluteA)):
+            pointA = soluteA[i]
+            pointB = soluteB[i]
+            # Extract x and y coordinates of each point
+            xA, yA, zA = pointA
+            xB, yB, zB = pointB
+            # Plot a line connecting the two points
+            self.tax.plot([(xA, yA, zA), (xB, yB, zB)], linewidth=1.0, color='green')
+        i+1
+        self.tax.show()            
+
+    # To generate the plot
     def plot(self):
         self.tax.clear_matplotlib_ticks()
         self.tax.get_axes().axis('off')
@@ -64,3 +79,8 @@ model.eq_line(eq_points)
 
 # To plot points
 model.plot()
+
+# Define 2 solutes and plot
+soluteA = model.add_points([(5, 5, 90), (10, 10, 80), (15, 15, 70)])
+soluteB = model.add_points([(90, 5, 5), (80, 10, 10), (70, 15, 15)])
+model.solute_points(soluteA, soluteB)
