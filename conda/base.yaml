@@ -11,6 +11,7 @@ dependencies:
   - pip
   - mkdocs
   - mkdocs-material
+  - ruff
     #- pip:
     # - makim==1.8.2
     
