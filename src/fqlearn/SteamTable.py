@@ -121,4 +121,3 @@ class SteamTable:
         ax.set_title('3D Diagram')
         ax.legend()
         plt.show()
-
