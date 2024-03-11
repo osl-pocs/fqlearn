@@ -3,8 +3,6 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy.interpolate import interp1d
-from scipy.optimize import fsolve
 
 from utils.hermite import pchint
 
@@ -39,7 +37,7 @@ class McCabeThiele:
             o = (alfa * x[i]) / (1 + x[i] * (alfa - 1))
             y.append(o)
 
-        data = {'x': x, 'y': y}
+        data = {"x": x, "y": y}
         df = pd.DataFrame(data)
 
         nombre_archivo = f"src/data/{compuesto1}-{compuesto2}.csv"
@@ -69,7 +67,7 @@ class McCabeThiele:
         If there is no matches for the compounds names, prints a message indicating that there are no matches for the compounds names.
         """
 
-        #TODO: Use volatity as an input variable for the function
+        # TODO: Use volatity as an input variable for the function
         # instead of asking in the command terminal
         if (compound_a, compound_b) in self.available_pair:
             self.compound_a = compound_a
@@ -84,18 +82,20 @@ class McCabeThiele:
                 print(
                     f"No hay datos disponibles para el par de compuestos {self.compound_a}-{self.compound_b}"
                 )
-                alfa = float(input('Alfa = '))
+                alfa = float(input("Alfa = "))
                 self.alfa = alfa
                 nuevo_archivo = self.volarel(alfa, self.compound_a, self.compound_b)
                 df = pd.read_csv(nuevo_archivo)
                 self.x = df["x"].tolist()
                 self.y = df["y"].tolist()
         else:
-            print("No hay datos disponibles para ese par de compuestos\n"
-                  "¿Deseas usar el índice de volatilidad relativa?")
-            answ = int(input('1. YES\n2. NO\n'))
+            print(
+                "No hay datos disponibles para ese par de compuestos\n"
+                "¿Deseas usar el índice de volatilidad relativa?"
+            )
+            answ = int(input("1. YES\n2. NO\n"))
             if answ == 1:
-                alfa = float(input('Alfa = '))
+                alfa = float(input("Alfa = "))
                 self.alfa = alfa
 
                 nuevo_archivo = self.volarel(alfa, compound_a, compound_b)
@@ -116,11 +116,12 @@ class McCabeThiele:
             self.xD = xD
             self.xW = xW
         else:
-            print('Por favor, introduce solo valores válidos\n'
-                  'Revisa los valores introducidos\n'
-                  'xD = {}\n'
-                  'xW = {}'.format(xD, xW))
-
+            print(
+                "Por favor, introduce solo valores válidos\n"
+                "Revisa los valores introducidos\n"
+                "xD = {}\n"
+                "xW = {}".format(xD, xW)
+            )
 
     def eq_line(self, a: float, b: float) -> callable:
         """
@@ -148,7 +149,7 @@ class McCabeThiele:
             return a + b * x
 
         return line
-    
+
     def set_feed(self, q, xF):
         """
         This function stores feed values
@@ -159,10 +160,12 @@ class McCabeThiele:
             self.xF = xF
             self.q = q
         else:
-            print('Por favor, introduce solo valores válidos\n'
-                  'Revisa los valores introducidos\n'
-                  'q = {}\n'
-                  'xF = {}'.format(q, xF))
+            print(
+                "Por favor, introduce solo valores válidos\n"
+                "Revisa los valores introducidos\n"
+                "q = {}\n"
+                "xF = {}".format(q, xF)
+            )
 
         # TODO: Change language messages to english
         """
@@ -182,7 +185,7 @@ class McCabeThiele:
         Store feed method
         """
         if q == 1:
-            #TODO: implement when q == 1
+            # TODO: implement when q == 1
             raise Exception("Not implemented yet")  # To do list
         self.feed = lambda x: q * x / (q - 1) - xF / (q - 1)
 
@@ -194,9 +197,9 @@ class McCabeThiele:
         R = 1 / (k - 1)
         self.Rmin = R
         return R
-    
+
     def inter_line(self, line, data_x, data_y):
-        #TODO: Refactor this code make it better
+        # TODO: Refactor this code make it better
         n = len(data_x)
         i, j = 0, n - 1
 
@@ -218,14 +221,16 @@ class McCabeThiele:
         return x_in, y_in
 
     def create_rect_line(self):
-        r =self.r
+        r = self.r
         xD = self.xD
+
         def _create_rect_line(x):
-            return (r*x+xD)/(r+1)
+            return (r * x + xD) / (r + 1)
+
         self.rect_line = _create_rect_line
-    
+
     def line_intersection(self, line1, line2):
-        x = (line1(0)-line2(0))/(line1(0)-line2(0)-line1(1)+line2(1))
+        x = (line1(0) - line2(0)) / (line1(0) - line2(0) - line1(1) + line2(1))
         return x, line2(x)
 
     def create_strip_line(self):
@@ -245,7 +250,7 @@ class McCabeThiele:
         # xe, ye stores the values of the ladder
         self.xe = []
         self.ye = []
-        
+
         self.interpolate_data()
         self.create_feed_line(self.q, self.xF)
         # x_in y y_in punto de intersección con la curva de eq y feed
@@ -259,7 +264,7 @@ class McCabeThiele:
         self.create_rect_line()
 
         self.yF = self.rect_line(self.xF)
-        
+
         self.create_strip_line()
 
         xp = self.xD
@@ -292,41 +297,45 @@ class McCabeThiele:
         def _find_intersection(a, b):
             if a + 1 == b:
                 return a, b
-            m = (a+b)//2
-            signal_change = (self.y_data[m]-self.feed(self.x_data[m]))*(self.y_data[a]-self.feed(self.x_data[a]))
-            
+            m = (a + b) // 2
+            signal_change = (self.y_data[m] - self.feed(self.x_data[m])) * (
+                self.y_data[a] - self.feed(self.x_data[a])
+            )
+
             if signal_change < 0:
                 b = m
             else:
                 a = m
 
             return _find_intersection(a, b)
-        
-        def intersection(line, x1,y1,x2,y2):
-            x = x1 + (y1 - line(x1))*(x2 - x1)/(line(x2) - line(x1) - y2 + y1)
+
+        def intersection(line, x1, y1, x2, y2):
+            x = x1 + (y1 - line(x1)) * (x2 - x1) / (line(x2) - line(x1) - y2 + y1)
             return x, line(x)
-        
+
         print(_find_intersection(a, b))
         ida, idb = _find_intersection(a, b)
-        x1, y1 =  self.x_data[ida], self.y_data[ida]
+        x1, y1 = self.x_data[ida], self.y_data[ida]
         x2, y2 = self.x_data[idb], self.y_data[idb]
 
-        x_int, y_int = intersection(self.feed, x1,y1,x2,y2)
+        x_int, y_int = intersection(self.feed, x1, y1, x2, y2)
 
         return x_int, y_int
-    
-    def describe(self):
-        print('Min Reflux: {}\n'
-            'Composition at the bottom: {}\n'.format(self.Rmin, self.xW))
 
-        print('\nComposición de entrada y salida en cada etapa:')
+    def describe(self):
+        print(
+            "Min Reflux: {}\n" "Composition at the bottom: {}\n".format(
+                self.Rmin, self.xW
+            )
+        )
+
+        print("\nComposición de entrada y salida en cada etapa:")
         for etapa in range(self.steps + 1):
             x_in = self.xe[etapa]
             y_out = self.ye[etapa]
-            print(f'Step {etapa + 1}: x={x_in:.4f}, y= {y_out:.4f}')
+            print(f"Step {etapa + 1}: x={x_in:.4f}, y= {y_out:.4f}")
 
-        print('\nTotal Steps: {}'.format(self.steps))
-
+        print("\nTotal Steps: {}".format(self.steps))
 
     def plot(self):
         x_rect = np.linspace(self.rx_int, self.xD, 50)
@@ -334,9 +343,9 @@ class McCabeThiele:
         _, ax = plt.subplots()
         x_strip = np.linspace(self.xW, self.rx_int, 50)
         y_strip = np.array([self.strip_line(c) for c in x_strip])
-        
+
         ax.plot(self.x_data, self.y_data, label="Equilibrium")
-        #ax.scatter(self.x_int, self.y_int, marker = '*', c = 'red',label = 'Intersection')
+        # ax.scatter(self.x_int, self.y_int, marker = '*', c = 'red',label = 'Intersection')
         ax.plot([0, 1], [0, 1])
         ax.plot(x_rect, y_rect, label="ROP")
         ax.plot(x_strip, y_strip, label="SOP")
