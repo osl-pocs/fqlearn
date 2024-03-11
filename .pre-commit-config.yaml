@@ -6,8 +6,26 @@ repos:
     hooks:
       - id: end-of-file-fixer
 
-  # - repo: local
-  #   hooks:
+  - repo: local
+    hooks:
+    # - id: ruff-linter
+    #   name: ruff-linter
+    #   entry: ruff check
+    #   language: system
+    #   exclude: "docs/|migrations/.*|literev/urls.py"
+    #   pass_filenames: true
+    #   types:
+    #     - python
+
+    - id: ruff-format
+      name: ruff-format
+      entry: ruff format
+      exclude: "docs/|migrations/.*|literev/urls.py" # exclude test dir
+      language: system
+      pass_filenames: true
+      types:
+        - python
+
     # - entry: black
     #   id: black
     #   name: black
@@ -31,24 +49,6 @@ repos:
     #   language: system
     #   files: "src/"
     #   description: Find unused Python code.
-    #   pass_filenames: true
-    #   types:
-    #     - python
-
-# - id: ruff-format
-    #   name: ruff-format
-    #   entry: ruff format
-    #   exclude: "docs/|migrations/.*|literev/urls.py" # exclude test dir
-    #   language: system
-    #   pass_filenames: true
-    #   types:
-    #     - python
-
-    # - id: ruff-linter
-    #   name: ruff-linter
-    #   entry: ruff check
-    #   language: system
-    #   exclude: "docs/|migrations/.*|literev/urls.py"
     #   pass_filenames: true
     #   types:
     #     - python
