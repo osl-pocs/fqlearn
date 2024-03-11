@@ -3,8 +3,6 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy.interpolate import interp1d
-from scipy.optimize import fsolve
 
 from utils.hermite import pchint
 

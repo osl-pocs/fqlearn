@@ -8,19 +8,19 @@ repos:
 
   - repo: local
     hooks:
-    # - id: ruff-linter
-    #   name: ruff-linter
-    #   entry: ruff check
-    #   language: system
-    #   exclude: "docs/|migrations/.*|literev/urls.py"
-    #   pass_filenames: true
-    #   types:
-    #     - python
+    - id: ruff-linter
+      name: ruff-linter
+      entry: ruff check
+      language: system
+      exclude: "tests/|__init__.py"
+      pass_filenames: true
+      types:
+        - python
 
     - id: ruff-format
       name: ruff-format
       entry: ruff format
-      exclude: "docs/|migrations/.*|literev/urls.py" # exclude test dir
+      exclude: "tests/|__init__.py" # exclude test dir
       language: system
       pass_filenames: true
       types:
@@ -34,13 +34,13 @@ repos:
     #   types:
     #     - python
 
-    # - id: isort
-    #   entry: isort
-    #   name: isort
-    #   language: system
-    #   pass_filenames: true
-    #   types:
-    #     - python
+    - id: isort
+      entry: isort
+      name: isort
+      language: system
+      pass_filenames: true
+      types:
+        - python
 
 # Implement this with the new tests
     # - id: vulture
