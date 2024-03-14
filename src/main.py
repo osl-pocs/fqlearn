@@ -1,5 +1,4 @@
 from fqlearn.McCabeThiele import McCabeThiele
-from fqlearn.SteamTable import SteamTable
 
 model = McCabeThiele()
 
