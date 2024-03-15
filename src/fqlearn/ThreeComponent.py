@@ -39,8 +39,8 @@ class ThreeComponent:
         self.points = []
         self._right_equilibrium_line = []
         self._left_equilibrium_line = []
-    
-    # To add points to the plot   
+
+    # To add points to the plot
     def add_point(self, points):
         # Check if points is a list of lists or a single list
         if isinstance(
@@ -53,7 +53,7 @@ class ThreeComponent:
             for point in points:
                 assert point[0] + point[1] + point[2] == self.scale
                 self.points.append(point)
-        self.tax.scatter(self.points, marker='s', color='blue')
+        self.tax.scatter(self.points, marker="s", color="blue")
         return self.points
 
     # To plot equilibrium line joining the points
@@ -68,14 +68,21 @@ class ThreeComponent:
     def solute_points(self, soluteA, soluteB):
         for i in range(len(soluteA)):
             pointA = soluteA[i]
+            assert sum(pointA) == self.scale
             pointB = soluteB[i]
+            assert sum(pointB) == self.scale
             # Extract x and y coordinates of each point
             xA, yA, zA = pointA
             xB, yB, zB = pointB
+            # Plot the two points
+            self.tax.scatter([(xA, yA, zA), (xB, yB, zB)], marker="s", color="blue")
             # Plot a line connecting the two points
-            self.tax.plot([(xA, yA, zA), (xB, yB, zB)], linewidth=1.0, color='green')
+            self.tax.plot([(xA, yA, zA), (xB, yB, zB)], linewidth=1.0, color="green")
         i + 1
-        self.tax.show()            
+        self.tax.show()
+        self.points.extend(soluteA)
+        self.points.extend(soluteB)
+        return self.points
 
     # To generate the plot
     def plot(self):
