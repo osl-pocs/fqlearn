@@ -1,9 +1,12 @@
-import matplotlib
+import matplotlib as plt
+import numpy as np
+import pandas as pd
 import ternary
+from scipy.interpolate import CubicSpline
 
 # Make images higher resolution and set default size
-matplotlib.rcParams["figure.dpi"] = 200
-matplotlib.rcParams["figure.figsize"] = (4, 4)
+plt.rcParams["figure.dpi"] = 200
+plt.rcParams["figure.figsize"] = (4, 4)
 
 
 # This class plots a ternary phase diagrams using triangular axes
@@ -53,18 +56,18 @@ class ThreeComponent:
             for point in points:
                 assert point[0] + point[1] + point[2] == self.scale
                 self.points.append(point)
-        self.tax.scatter(self.points, marker="s", color="blue")
+        self.tax.scatter(
+            self.points, linewidth=1.0, marker="o", color="blue", label="Points"
+        )
         return self.points
 
     # To plot equilibrium line joining the points
     def eq_line(self, points):
         self.add_point(points)
-        self.tax.plot(points, linewidth=2.0, label="Equilibrium line")
-        self.tax.legend()
-        self.tax.show()
+        self.tax.plot(points, linewidth=1.0, label="Equilibrium line")
         return self.points
 
-    # Join the corresponding points of 2 solutes
+    # To join the corresponding points of 2 solutes
     def solute_points(self, soluteA, soluteB):
         for i in range(len(soluteA)):
             pointA = soluteA[i]
@@ -75,18 +78,60 @@ class ThreeComponent:
             xA, yA, zA = pointA
             xB, yB, zB = pointB
             # Plot the two points
-            self.tax.scatter([(xA, yA, zA), (xB, yB, zB)], marker="s", color="blue")
+            self.tax.scatter(
+                [(xA, yA, zA), (xB, yB, zB)], marker="s", color="blue", label="Points"
+            )
             # Plot a line connecting the two points
-            self.tax.plot([(xA, yA, zA), (xB, yB, zB)], linewidth=1.0, color="green")
+            self.tax.plot(
+                [(xA, yA, zA), (xB, yB, zB)],
+                linewidth=1.0,
+                color="green",
+                label="Plotted curve",
+            )
         i + 1
-        self.tax.show()
         self.points.extend(soluteA)
         self.points.extend(soluteB)
         return self.points
+
+    # Cubic spline interpolation of the points
+    def interpolate(self):
+        points = []
+        df = pd.read_csv("src/data/sampledata.csv")
+        points = [
+            (row["x"] * 100, row["y"] * 100, row["z"] * 100)
+            for index, row in df.iterrows()
+        ]
+        # Remove duplicate points
+        new_points = []
+        [new_points.append(xyz) for xyz in points if xyz not in new_points]
+
+        xyz = [(x, y, z) for x, y, z in new_points]
+        sorted_points = sorted(xyz, key=lambda m: m[0])
+        x = [x for x, y, z in sorted_points]
+        y = [y for x, y, z in sorted_points]
+        z = [z for x, y, z in sorted_points]
+
+        # Plot the points
+        self.tax.scatter(
+            sorted_points, linewidth=1.0, marker="o", color="blue", label="Points"
+        )
+
+        # Cubic spline interpolation
+        f = CubicSpline(x, y, bc_type="natural")
+        x_new = np.linspace(0, 100, 100)
+        y_new = f(x_new)
+
+        # Plot the curve
+        self.tax.plot(
+            np.column_stack((x_new, y_new)), linewidth=1.0, label="Interpolated curve"
+        )
 
     # To generate the plot
     def plot(self):
         self.tax.clear_matplotlib_ticks()
         self.tax.get_axes().axis("off")
-
+        self.tax.legend()
         ternary.plt.show()
+
+
+model = ThreeComponent()
