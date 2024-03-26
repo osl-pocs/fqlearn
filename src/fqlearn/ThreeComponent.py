@@ -40,8 +40,8 @@ class ThreeComponent:
         )  # the default, essentially
 
         self.points = []
-        self._right_equilibrium_line = []
-        self._left_equilibrium_line = []
+        self.right_eq_line = []
+        self.left_eq_line = []
 
     # To add points to the plot
     def add_point(self, points):
@@ -94,16 +94,12 @@ class ThreeComponent:
         return self.points
 
     # Cubic spline interpolation of the points
-    def interpolate(self):
-        points = []
-        df = pd.read_csv("src/data/sampledata.csv")
-        points = [
-            (row["x"] * 100, row["y"] * 100, row["z"] * 100)
-            for index, row in df.iterrows()
-        ]
+    def interpolate(self, points):
         # Remove duplicate points
-        new_points = []
-        [new_points.append(xyz) for xyz in points if xyz not in new_points]
+        new_points = list(set(points))
+
+        # Multiply each point by 100
+        new_points = [(x * 100, y * 100, z * 100) for x, y, z in new_points]
 
         xyz = [(x, y, z) for x, y, z in new_points]
         sorted_points = sorted(xyz, key=lambda m: m[0])
@@ -118,13 +114,18 @@ class ThreeComponent:
 
         # Cubic spline interpolation
         f = CubicSpline(x, y, bc_type="natural")
-        x_new = np.linspace(0, 100, 100)
-        y_new = f(x_new)
+        x_cubic = np.linspace(0, 100, 100)
+        y_cubic = f(x_cubic)
+
+        # Remove negative points
+        points_to_plot = [
+            [i, j]
+            for i, j in np.column_stack((x_cubic, y_cubic))
+            if 0 <= i <= 100 and 0 <= j <= 100
+        ]
 
         # Plot the curve
-        self.tax.plot(
-            np.column_stack((x_new, y_new)), linewidth=1.0, label="Interpolated curve"
-        )
+        self.tax.plot(points_to_plot, linewidth=1.0, label="Interpolated curve")
 
     # To generate the plot
     def plot(self):
@@ -132,6 +133,3 @@ class ThreeComponent:
         self.tax.get_axes().axis("off")
         self.tax.legend()
         ternary.plt.show()
-
-
-model = ThreeComponent()
