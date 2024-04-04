@@ -1,6 +1,5 @@
 import matplotlib as plt
 import numpy as np
-import pandas as pd
 import ternary
 from scipy.interpolate import CubicSpline
 
@@ -47,8 +46,10 @@ class ThreeComponent:
     def add_point(self, points):
         # Check if points is an empty list
         if not points:
-            raise ValueError("The 'points' list cannot be empty. Please provide valid points.")
-    
+            raise ValueError(
+                "The 'points' list cannot be empty. Please provide valid points."
+            )
+
         # Remove duplicate points
         new_points = list(set(points))
 
@@ -70,7 +71,7 @@ class ThreeComponent:
             for sorted_point in sorted_points:
                 assert sorted_point[0] + sorted_point[1] + sorted_point[2] == self.scale
                 self.points.append(sorted_point)
-        
+
         # Plot the points
         self.tax.scatter(
             self.points, linewidth=1.0, marker="o", color="red", label="Points"
@@ -113,10 +114,9 @@ class ThreeComponent:
             # Extract x and y coordinates of each point
             xA, yA, zA = pointA
             xB, yB, zB = pointB
-  
+
             # Plot the two points
-            self.tax.scatter(
-                [(xA, yA, zA), (xB, yB, zB)], marker="s", color="red")
+            self.tax.scatter([(xA, yA, zA), (xB, yB, zB)], marker="s", color="red")
             # Plot a line connecting the two points
             self.tax.plot(
                 [(xA, yA, zA), (xB, yB, zB)],
@@ -161,12 +161,12 @@ class ThreeComponent:
                 slopes.append(0)
         i + 1
         print("Slope = ", slopes)
-    
+
         # Calculate average of the slope
-        avg_slope = sum(slopes)/len(slopes)
+        avg_slope = sum(slopes) / len(slopes)
         print("Average slope = ", avg_slope)
         return avg_slope
-    
+
     # Cubic spline interpolation of the points
     def interpolate(self, points):
         self.add_point(points)
@@ -174,7 +174,6 @@ class ThreeComponent:
         # Cubic spline interpolation
         x = [x for x, y, z in self.points]
         y = [y for x, y, z in self.points]
-        z = [z for x, y, z in self.points]
 
         f = CubicSpline(x, y, bc_type="natural")
         x_cubic = np.linspace(0, 100, 100)
@@ -196,33 +195,3 @@ class ThreeComponent:
         self.tax.get_axes().axis("off")
         self.tax.legend()
         ternary.plt.show()
-
-model = ThreeComponent()
-
-# points = [(0.02, 0.02, 0.96), (0.025, 0.06, 0.915), (0.03, 0.1, 0.87), 
-#             (0.035, 0.16, 0.805), (0.04, 0.2, 0.76), (0.045, 0.25, 0.705), 
-#             (0.05, 0.3, 0.65), (0.07, 0.36, 0.57), (0.09, 0.4, 0.51), 
-#             (0.14, 0.48, 0.38), (0.33, 0.49, 0.18), (0.97, 0.01, 0.02), 
-#             (0.95, 0.03, 0.02), (0.91, 0.06, 0.03), (0.88, 0.09, 0.03), 
-#             (0.83, 0.13, 0.04), (0.79, 0.17, 0.04), (0.745, 0.2, 0.055), 
-#             (0.68, 0.26, 0.06), (0.62, 0.3, 0.08), (0.49, 0.4, 0.11), 
-#             (0.33, 0.49, 0.18)] 
-
-right_eq_line = [(0.02, 0.02, 0.96), (0.025, 0.06, 0.915), (0.03, 0.1, 0.87), 
-            (0.035, 0.16, 0.805), (0.04, 0.2, 0.76), (0.045, 0.25, 0.705), 
-            (0.05, 0.3, 0.65), (0.07, 0.36, 0.57), (0.09, 0.4, 0.51), 
-            (0.14, 0.48, 0.38), (0.33, 0.49, 0.18)]
-left_eq_line = [(0.97, 0.01, 0.02), (0.95, 0.03, 0.02), (0.91, 0.06, 0.03), 
-                (0.88, 0.09, 0.03), (0.83, 0.13, 0.04), (0.79, 0.17, 0.04), 
-                (0.745, 0.2, 0.055), (0.68, 0.26, 0.06), (0.62, 0.3, 0.08), 
-                (0.49, 0.4, 0.11), (0.33, 0.49, 0.18)]
-
-# points = []
-
-# model.eq_line(right_eq_line, left_eq_line)
-# model.solute_points(right_eq_line, left_eq_line)
-model.eq_slope(right_eq_line, left_eq_line)
-
-# model.interpolate(points)
-# model.add_point(points)
-# model.plot()
