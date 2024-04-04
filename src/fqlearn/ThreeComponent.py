@@ -128,6 +128,45 @@ class ThreeComponent:
         self.points.extend(sorted_soluteB)
         return self.points
 
+    # Calculate the slope
+    def eq_slope(self, right_eq_line, left_eq_line):
+        # Multiply each point by 100
+        right_eq_line = [(x * 100, y * 100, z * 100) for x, y, z in right_eq_line]
+        left_eq_line = [(x * 100, y * 100, z * 100) for x, y, z in left_eq_line]
+
+        # Sort the points in ascending order
+        xyz = [(x, y, z) for x, y, z in right_eq_line]
+        right_eq = sorted(xyz, key=lambda m: m[0])
+        xyz = [(x, y, z) for x, y, z in left_eq_line]
+        left_eq = sorted(xyz, key=lambda m: m[0], reverse=True)
+
+        slopes = []
+
+        for i in range(len(right_eq_line)):
+            pointA = right_eq[i]
+            assert sum(pointA) == self.scale
+            pointB = left_eq[i]
+            assert sum(pointB) == self.scale
+
+            # Extract x and y coordinates of each point
+            xA, yA, zA = pointA
+            xB, yB, zB = pointB
+
+            # Calculate the slope of the line joining the points
+            if xA - xB != 0:  # Check for vertical line
+                slope = (yA - yB) / (xA - xB)
+                slopes.append(slope)
+            else:
+                # For vertical lines, return None for slope
+                slopes.append(0)
+        i + 1
+        print("Slope = ", slopes)
+    
+        # Calculate average of the slope
+        avg_slope = sum(slopes)/len(slopes)
+        print("Average slope = ", avg_slope)
+        return avg_slope
+    
     # Cubic spline interpolation of the points
     def interpolate(self, points):
         self.add_point(points)
@@ -181,7 +220,9 @@ left_eq_line = [(0.97, 0.01, 0.02), (0.95, 0.03, 0.02), (0.91, 0.06, 0.03),
 # points = []
 
 # model.eq_line(right_eq_line, left_eq_line)
-model.solute_points(right_eq_line, left_eq_line)
+# model.solute_points(right_eq_line, left_eq_line)
+model.eq_slope(right_eq_line, left_eq_line)
+
 # model.interpolate(points)
 # model.add_point(points)
-model.plot()
+# model.plot()
