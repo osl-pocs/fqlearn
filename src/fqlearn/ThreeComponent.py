@@ -1,6 +1,7 @@
 import matplotlib as plt
 import numpy as np
 import ternary
+from scipy import interpolate
 from scipy.interpolate import CubicSpline
 
 # Make images higher resolution and set default size
@@ -16,10 +17,10 @@ class ThreeComponent:
         self.tax.boundary(linewidth=1.5)
         self.tax.gridlines(color="black", multiple=6)
         self.tax.gridlines(color="blue", multiple=2, linewidth=0.5)
-        self.fontsize = 8
+        self.fontsize = 7
         # self.tax.ticks(fontsize=5)
         self.offset = 0.14
-        self.tax.set_title("Three Component Phase Diagram\n", fontsize=self.fontsize)
+        self.tax.set_title("Ternary Phase Diagram\n", fontsize=10)
         self.tax.left_axis_label(
             "Mass fraction of C", fontsize=self.fontsize, offset=self.offset
         )
@@ -27,11 +28,11 @@ class ThreeComponent:
             "Mass fraction of B", fontsize=self.fontsize, offset=self.offset
         )
         self.tax.bottom_axis_label(
-            "Mass fraction of A", fontsize=self.fontsize, offset=self.offset
+            "Mass fraction of A", fontsize=self.fontsize, offset=0.05
         )
-        self.tax.left_corner_label("C", fontsize=self.fontsize)
-        self.tax.right_corner_label("A", fontsize=self.fontsize)
-        self.tax.top_corner_label("B", fontsize=self.fontsize)
+        self.tax.left_corner_label("C", fontsize=9)
+        self.tax.right_corner_label("A", fontsize=9)
+        self.tax.top_corner_label("B", fontsize=9, offset=self.offset)
         self.tax.ticks(axis="lbr", linewidth=1, multiple=10, offset=0.02)
 
         self.tax.set_background_color(
@@ -60,23 +61,26 @@ class ThreeComponent:
         xyz = [(x, y, z) for x, y, z in new_points]
         sorted_points = sorted(xyz, key=lambda m: m[0])
 
+        # New list to store sorted points
+        new_sorted_points = []
+
         # Check if the points are in a list of lists or a single list
         if isinstance(
             sorted_points[0], (int, float)
         ):  # Check if the first element of points is a number
             assert sorted_points[0] + sorted_points[1] + sorted_points[2] == self.scale
-            self.points.append(sorted_points)
+            new_sorted_points.append(sorted_points)
         else:
             # If the points are in a list of lists
             for sorted_point in sorted_points:
                 assert sorted_point[0] + sorted_point[1] + sorted_point[2] == self.scale
-                self.points.append(sorted_point)
+                new_sorted_points.append(sorted_point)
 
         # Plot the points
         self.tax.scatter(
-            self.points, linewidth=1.0, marker="o", color="red", label="Points"
+            new_sorted_points, linewidth=1.0, marker="o", color="red", label="Points"
         )
-        return self.points
+        return new_sorted_points
 
     # To plot an equilibrium line joining the points on the right and left
     def eq_line(self, right_eq_line, left_eq_line):
@@ -189,9 +193,111 @@ class ThreeComponent:
         # Plot the curve
         self.tax.plot(points_to_plot, linewidth=1.0, label="Interpolated curve")
 
+    def derivative(self, points):
+        self.add_point(points)
+
+        # Extract x and y values
+        x = [x for x, y, z in self.points]
+        y = [y for x, y, z in self.points]
+
+        # Calculate derivative
+        dydx = np.diff([y])/np.diff([x])
+        # print(dydx)
+        return dydx        
+
+    def min_diff(self, right_eq_line, left_eq_line, points):
+        dydx = self.derivative(points)
+        avg_slope = self.eq_slope(right_eq_line, left_eq_line)
+
+        min_index = 0
+        min_dm = dydx[0]
+        for index, der in dydx:
+            if abs(der - avg_slope) < min_dm:
+                min_dm = der
+                min_index = index
+
+        return min_index
+
+    def div_half(self, right_eq_line, left_eq_line):
+        # Add the points
+        right_points = self.add_point(right_eq_line)
+        left_points = self.add_point(left_eq_line)
+
+        # Remove the common values from both lists
+        common_values = set(right_points) & set(left_points)
+
+        new_right_points = [tuple for tuple in right_points if tuple not in common_values]
+        new_left_points = [tuple for tuple in left_points if tuple not in common_values]
+
+        # Find the slope between the top-most points on both sides
+        x0, y0, z0 = new_right_points[0]
+        x1, y1, z1 = new_left_points[-1]
+
+        slope = (y1-y0)/(x1-x0)
+
+        # Interpolate between the top-most points
+        total_points = []
+        total_points.append(new_right_points[0])
+        total_points.append(new_left_points[-1])
+        print(total_points)
+        self.interpolate(total_points)
+
+
+
+    def tangent(self, right_eq_line, left_eq_line, points):
+        # Define the equation parameters
+        m = 0 # Slope
+        c = 0 # Intercept
+
+        # Choose a range of values for variable A
+        x_values = np.linspace(0, 100, 100)  # Example: Range from 0 to 100
+
+        # Calculate corresponding values of B and C using the equation y = mx + c
+        y_values = (m * x_values) + c
+        z_values = 100 - x_values - y_values  # Since A + B + C = 100
+
+        # Convert values to ternary coordinates
+        tangent_points = [(x, y, z) for x,y,z in zip(x_values, y_values, z_values)]
+
+        # Plot the line
+        self.tax.plot(tangent_points, linewidth=2.0, color='blue', label="Tangent line")
+     
     # To generate the plot
     def plot(self):
         self.tax.clear_matplotlib_ticks()
         self.tax.get_axes().axis("off")
-        self.tax.legend()
+        # self.tax.legend()
         ternary.plt.show()
+
+model = ThreeComponent()
+
+points = [(0.02, 0.02, 0.96), (0.025, 0.06, 0.915), (0.03, 0.1, 0.87), 
+            (0.035, 0.16, 0.805), (0.04, 0.2, 0.76), (0.045, 0.25, 0.705), 
+            (0.05, 0.3, 0.65), (0.07, 0.36, 0.57), (0.09, 0.4, 0.51), 
+            (0.14, 0.48, 0.38), (0.33, 0.49, 0.18), (0.97, 0.01, 0.02), 
+            (0.95, 0.03, 0.02), (0.91, 0.06, 0.03), (0.88, 0.09, 0.03), 
+            (0.83, 0.13, 0.04), (0.79, 0.17, 0.04), (0.745, 0.2, 0.055), 
+            (0.68, 0.26, 0.06), (0.62, 0.3, 0.08), (0.49, 0.4, 0.11), 
+            (0.33, 0.49, 0.18)] 
+
+right_eq_line = [(0.02, 0.02, 0.96), (0.025, 0.06, 0.915), (0.03, 0.1, 0.87), 
+            (0.035, 0.16, 0.805), (0.04, 0.2, 0.76), (0.045, 0.25, 0.705), 
+            (0.05, 0.3, 0.65), (0.07, 0.36, 0.57), (0.09, 0.4, 0.51), 
+            (0.14, 0.48, 0.38), (0.33, 0.49, 0.18)]
+left_eq_line = [(0.97, 0.01, 0.02), (0.95, 0.03, 0.02), (0.91, 0.06, 0.03), 
+                (0.88, 0.09, 0.03), (0.83, 0.13, 0.04), (0.79, 0.17, 0.04), 
+                (0.745, 0.2, 0.055), (0.68, 0.26, 0.06), (0.62, 0.3, 0.08), 
+                (0.49, 0.4, 0.11), (0.33, 0.49, 0.18)]
+
+points = []
+
+# model.eq_line(right_eq_line, left_eq_line)
+# model.solute_points(right_eq_line, left_eq_line)
+# model.eq_slope(right_eq_line, left_eq_line)
+# model.tangent(right_eq_line, left_eq_line)
+# model.derivative(points)
+model.div_half(right_eq_line, left_eq_line)
+
+# model.interpolate(points)
+# model.add_point(points)
+# model.plot()
