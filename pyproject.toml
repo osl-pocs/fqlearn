@@ -2,7 +2,7 @@
 name = "fqlearn"
 version = "0.1.0"
 description = ""
-authors = ["EverVino <evervino00@gmail.com>"]
+authors = ["EverVino <evervino00@gmail.com>", "Faith Hunja <faithhunja17@gmail.com>"]
 readme = "README.md"
 packages = [{include = "fqlearn", from = "src"}]
 
@@ -15,6 +15,7 @@ scipy = "^1.11.4"
 
 #[tool.pytest.ini_options]
 #python = ["src"]
+python-ternary = "^1.0.8"
 
 [build-system]
 requires = ["poetry-core"]

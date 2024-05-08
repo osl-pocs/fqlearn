@@ -1,7 +1,6 @@
 import matplotlib as plt
 import numpy as np
 import ternary
-from scipy import interpolate
 from scipy.interpolate import CubicSpline
 
 # Make images higher resolution and set default size
@@ -18,7 +17,6 @@ class ThreeComponent:
         self.tax.gridlines(color="black", multiple=6)
         self.tax.gridlines(color="blue", multiple=2, linewidth=0.5)
         self.fontsize = 7
-        # self.tax.ticks(fontsize=5)
         self.offset = 0.14
         self.tax.set_title("Ternary Phase Diagram\n", fontsize=10)
         self.tax.left_axis_label(
@@ -52,13 +50,22 @@ class ThreeComponent:
             )
 
         # Remove duplicate points
-        new_points = list(set(points))
+        points_to_plot = list(set(points))
 
         # Multiply each point by 100
-        new_points = [(x * 100, y * 100, z * 100) for x, y, z in new_points]
+        points_to_plot = [(x * 100, y * 100, z * 100) for x, y, z in points_to_plot]
 
+        # Plot the points
+        self.tax.scatter(
+            points_to_plot, linewidth=1.0, marker="o", color="red", label="Points"
+        )
+        return points_to_plot
+
+    # To sort the points
+    def sort_points(self, points):
+        points_to_plot = self.add_point(points)
         # Sort the points in ascending order
-        xyz = [(x, y, z) for x, y, z in new_points]
+        xyz = [(x, y, z) for x, y, z in points_to_plot]
         sorted_points = sorted(xyz, key=lambda m: m[0])
 
         # New list to store sorted points
@@ -84,8 +91,8 @@ class ThreeComponent:
 
     # To plot an equilibrium line joining the points on the right and left
     def eq_line(self, right_eq_line, left_eq_line):
-        eq_line = self.add_point(right_eq_line)
-        left_eq = self.add_point(left_eq_line)
+        eq_line = self.sort_points(right_eq_line)
+        left_eq = self.sort_points(left_eq_line)
         eq_line.extend(left_eq)
 
         # Remove duplicate points
@@ -153,8 +160,8 @@ class ThreeComponent:
             assert sum(pointB) == self.scale
 
             # Extract x and y coordinates of each point
-            xA, yA, zA = pointA
-            xB, yB, zB = pointB
+            xA, yA, _ = pointA
+            xB, yB, _ = pointB
 
             # Calculate the slope of the line joining the points
             if xA - xB != 0:  # Check for vertical line
@@ -166,88 +173,91 @@ class ThreeComponent:
         i + 1
         print("Slope = ", slopes)
 
-        # Calculate average of the slope
+        # Calculate average of the slopes
         avg_slope = sum(slopes) / len(slopes)
         print("Average slope = ", avg_slope)
         return avg_slope
 
-    # Cubic spline interpolation of the points
-    def interpolate(self, points):
-        self.add_point(points)
+    # Interpolate the points
+    def interpolate_points(self, points):
+        sorted_points = self.sort_points(points)
 
         # Cubic spline interpolation
-        x = [x for x, y, z in self.points]
-        y = [y for x, y, z in self.points]
+        x = [x for x, y, z in sorted_points]
+        y = [y for x, y, z in sorted_points]
 
         f = CubicSpline(x, y, bc_type="natural")
         x_cubic = np.linspace(0, 100, 100)
         y_cubic = f(x_cubic)
 
         # Remove negative points
-        points_to_plot = [
+        interpolated_points = [
             [i, j]
             for i, j in np.column_stack((x_cubic, y_cubic))
             if 0 <= i <= 100 and 0 <= j <= 100
         ]
 
         # Plot the curve
-        self.tax.plot(points_to_plot, linewidth=1.0, label="Interpolated curve")
+        self.tax.plot(interpolated_points, linewidth=1.0, label="Interpolated curve")
 
+        return interpolated_points
+
+    # Calculate the derivative
     def derivative(self, points):
-        self.add_point(points)
+        points_to_derive = self.sort_points(points)
 
         # Extract x and y values
-        x = [x for x, y, z in self.points]
-        y = [y for x, y, z in self.points]
+        x = [x for x, y, z in points_to_derive]
+        y = [y for x, y, z in points_to_derive]
 
         # Calculate derivative
-        dydx = np.diff([y])/np.diff([x])
-        # print(dydx)
-        return dydx        
+        dydx = np.diff([y]) / np.diff([x])
+        # print(type(dydx))
+        return dydx
 
     def min_diff(self, right_eq_line, left_eq_line, points):
         dydx = self.derivative(points)
         avg_slope = self.eq_slope(right_eq_line, left_eq_line)
 
         min_index = 0
-        min_dm = dydx[0]
-        for index, der in dydx:
-            if abs(der - avg_slope) < min_dm:
-                min_dm = der
+        # Initialize min_diff_value with the first element difference
+        min_diff_value = abs(dydx[0][0] - avg_slope)
+
+        # Iterate over elements in the array
+        for index in range(1, dydx.size):  # Iterate over indices of dydx
+            diff = abs(dydx[0][index] - avg_slope)
+            if diff < min_diff_value:
+                min_diff_value = diff
                 min_index = index
 
+        # print(min_index)
         return min_index
 
-    def div_half(self, right_eq_line, left_eq_line):
+    def div_half(self, right_eq_line, left_eq_line, points):
         # Add the points
-        right_points = self.add_point(right_eq_line)
-        left_points = self.add_point(left_eq_line)
+        # right_points = self.sort_points(right_eq_line)
+        # left_points = self.sort_points(left_eq_line)
+        interpolated_points = self.interpolate_points(points)
 
-        # Remove the common values from both lists
-        common_values = set(right_points) & set(left_points)
+        index = self.min_diff(right_eq_line, left_eq_line, points)
+        self.interpolated_right_side = interpolated_points[index:]
+        print("Right side = ", self.interpolated_right_side)
+        self.interpolated_left_side = interpolated_points[:index]
+        print("Left side = ", self.interpolated_left_side)
 
-        new_right_points = [tuple for tuple in right_points if tuple not in common_values]
-        new_left_points = [tuple for tuple in left_points if tuple not in common_values]
-
-        # Find the slope between the top-most points on both sides
-        x0, y0, z0 = new_right_points[0]
-        x1, y1, z1 = new_left_points[-1]
-
-        slope = (y1-y0)/(x1-x0)
-
-        # Interpolate between the top-most points
-        total_points = []
-        total_points.append(new_right_points[0])
-        total_points.append(new_left_points[-1])
-        print(total_points)
-        self.interpolate(total_points)
-
-
+        # Plot the curve
+        # self.tax.plot(self.interpolated_right_side, linewidth=1.0, color = "blue", label="Interpolated curve")
+        self.tax.plot(
+            self.interpolated_left_side,
+            linewidth=1.0,
+            color="orange",
+            label="Interpolated curve",
+        )
 
     def tangent(self, right_eq_line, left_eq_line, points):
         # Define the equation parameters
-        m = 0 # Slope
-        c = 0 # Intercept
+        m = 0  # Slope
+        c = 0  # Intercept
 
         # Choose a range of values for variable A
         x_values = np.linspace(0, 100, 100)  # Example: Range from 0 to 100
@@ -257,47 +267,14 @@ class ThreeComponent:
         z_values = 100 - x_values - y_values  # Since A + B + C = 100
 
         # Convert values to ternary coordinates
-        tangent_points = [(x, y, z) for x,y,z in zip(x_values, y_values, z_values)]
+        tangent_points = [(x, y, z) for x, y, z in zip(x_values, y_values, z_values)]
 
         # Plot the line
-        self.tax.plot(tangent_points, linewidth=2.0, color='blue', label="Tangent line")
-     
+        self.tax.plot(tangent_points, linewidth=2.0, color="blue", label="Tangent line")
+
     # To generate the plot
     def plot(self):
         self.tax.clear_matplotlib_ticks()
         self.tax.get_axes().axis("off")
         # self.tax.legend()
         ternary.plt.show()
-
-model = ThreeComponent()
-
-points = [(0.02, 0.02, 0.96), (0.025, 0.06, 0.915), (0.03, 0.1, 0.87), 
-            (0.035, 0.16, 0.805), (0.04, 0.2, 0.76), (0.045, 0.25, 0.705), 
-            (0.05, 0.3, 0.65), (0.07, 0.36, 0.57), (0.09, 0.4, 0.51), 
-            (0.14, 0.48, 0.38), (0.33, 0.49, 0.18), (0.97, 0.01, 0.02), 
-            (0.95, 0.03, 0.02), (0.91, 0.06, 0.03), (0.88, 0.09, 0.03), 
-            (0.83, 0.13, 0.04), (0.79, 0.17, 0.04), (0.745, 0.2, 0.055), 
-            (0.68, 0.26, 0.06), (0.62, 0.3, 0.08), (0.49, 0.4, 0.11), 
-            (0.33, 0.49, 0.18)] 
-
-right_eq_line = [(0.02, 0.02, 0.96), (0.025, 0.06, 0.915), (0.03, 0.1, 0.87), 
-            (0.035, 0.16, 0.805), (0.04, 0.2, 0.76), (0.045, 0.25, 0.705), 
-            (0.05, 0.3, 0.65), (0.07, 0.36, 0.57), (0.09, 0.4, 0.51), 
-            (0.14, 0.48, 0.38), (0.33, 0.49, 0.18)]
-left_eq_line = [(0.97, 0.01, 0.02), (0.95, 0.03, 0.02), (0.91, 0.06, 0.03), 
-                (0.88, 0.09, 0.03), (0.83, 0.13, 0.04), (0.79, 0.17, 0.04), 
-                (0.745, 0.2, 0.055), (0.68, 0.26, 0.06), (0.62, 0.3, 0.08), 
-                (0.49, 0.4, 0.11), (0.33, 0.49, 0.18)]
-
-points = []
-
-# model.eq_line(right_eq_line, left_eq_line)
-# model.solute_points(right_eq_line, left_eq_line)
-# model.eq_slope(right_eq_line, left_eq_line)
-# model.tangent(right_eq_line, left_eq_line)
-# model.derivative(points)
-model.div_half(right_eq_line, left_eq_line)
-
-# model.interpolate(points)
-# model.add_point(points)
-# model.plot()
