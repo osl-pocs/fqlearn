@@ -37,11 +37,12 @@ class ThreeComponent:
             color="whitesmoke", alpha=0.7
         )  # the default, essentially
 
-        self.points = []
+        # Initialize required variables
         self.right_eq_line = []
         self.left_eq_line = []
+        self.points = self.right_eq_line + self.left_eq_line
 
-    # To add points to the plot
+    # Add points to the plot
     def add_point(self, points):
         # Check if points is an empty list
         if not points:
@@ -57,11 +58,10 @@ class ThreeComponent:
 
         # Plot the points
         self.tax.scatter(
-            points_to_plot, linewidth=1.0, marker="o", color="red", label="Points"
-        )
+            points_to_plot, linewidth=1.0, marker="o", color="red")
         return points_to_plot
 
-    # To sort the points
+    # Sort the added points
     def sort_points(self, points):
         points_to_plot = self.add_point(points)
         # Sort the points in ascending order
@@ -85,15 +85,15 @@ class ThreeComponent:
 
         # Plot the points
         self.tax.scatter(
-            new_sorted_points, linewidth=1.0, marker="o", color="red", label="Points"
-        )
+            new_sorted_points, linewidth=1.0, marker="o", color="red")
         return new_sorted_points
 
-    # To plot an equilibrium line joining the points on the right and left
-    def eq_line(self, right_eq_line, left_eq_line):
-        eq_line = self.sort_points(right_eq_line)
-        left_eq = self.sort_points(left_eq_line)
-        eq_line.extend(left_eq)
+    # Plot an equilibrium line joining the points on the right and left
+    def add_eq_line(self, right_eq_line, left_eq_line):
+        # Add the points
+        self.right_eq_line = self.sort_points(right_eq_line)
+        self.left_eq_line = self.sort_points(left_eq_line)
+        eq_line = self.right_eq_line + self.left_eq_line
 
         # Remove duplicate points
         eq_line_plot = list(set(eq_line))
@@ -104,7 +104,7 @@ class ThreeComponent:
 
         self.tax.plot(sorted_eq, linewidth=1.0, color="blue", label="Equilibrium line")
 
-    # To join the corresponding points of 2 solutes
+    # Join the corresponding points of 2 solutes
     def solute_points(self, soluteA, soluteB):
         # Multiply each point by 100
         new_soluteA = [(x * 100, y * 100, z * 100) for x, y, z in soluteA]
@@ -135,11 +135,8 @@ class ThreeComponent:
                 color="blue",
             )
         i + 1
-        self.points.extend(sorted_soluteA)
-        self.points.extend(sorted_soluteB)
-        return self.points
 
-    # Calculate the slope
+    # Calculate the slope between the points on the left and right
     def eq_slope(self, right_eq_line, left_eq_line):
         # Multiply each point by 100
         right_eq_line = [(x * 100, y * 100, z * 100) for x, y, z in right_eq_line]
@@ -197,84 +194,63 @@ class ThreeComponent:
             if 0 <= i <= 100 and 0 <= j <= 100
         ]
 
-        # Plot the curve
-        self.tax.plot(interpolated_points, linewidth=1.0, label="Interpolated curve")
-
         return interpolated_points
 
-    # Calculate the derivative
+    # Calculate the derivative of the interpolated points
     def derivative(self, points):
-        points_to_derive = self.sort_points(points)
+        points_to_derive = self.interpolate_points(points)
 
         # Extract x and y values
-        x = [x for x, y, z in points_to_derive]
-        y = [y for x, y, z in points_to_derive]
+        x = [x for x, _ in points_to_derive]
+        y = [y for _, y, in points_to_derive]
 
         # Calculate derivative
         dydx = np.diff([y]) / np.diff([x])
-        # print(type(dydx))
+
         return dydx
 
-    def min_diff(self, right_eq_line, left_eq_line, points):
-        dydx = self.derivative(points)
+    # Calculate the index of the point halving the equilibrium line
+    def min_diff(self, right_eq_line, left_eq_line):
+        self.points = right_eq_line + left_eq_line
+        dydx = self.derivative(self.points)
         avg_slope = self.eq_slope(right_eq_line, left_eq_line)
 
         min_index = 0
         # Initialize min_diff_value with the first element difference
         min_diff_value = abs(dydx[0][0] - avg_slope)
 
-        # Iterate over elements in the array
-        for index in range(1, dydx.size):  # Iterate over indices of dydx
+        # Iterate over indices of dydx to find the index with the derivative value closest to the average slope
+        for index in range(0, dydx.size):
             diff = abs(dydx[0][index] - avg_slope)
             if diff < min_diff_value:
                 min_diff_value = diff
                 min_index = index
 
-        # print(min_index)
         return min_index
-
-    def div_half(self, right_eq_line, left_eq_line, points):
+    
+    # Divide the equilibrium line in half
+    def div_half(self, right_eq_line, left_eq_line):
         # Add the points
-        # right_points = self.sort_points(right_eq_line)
-        # left_points = self.sort_points(left_eq_line)
-        interpolated_points = self.interpolate_points(points)
+        self.points = right_eq_line + left_eq_line
+        interpolated_points = self.interpolate_points(self.points)
 
-        index = self.min_diff(right_eq_line, left_eq_line, points)
+        # Use index to separate right and left side
+        index = self.min_diff(right_eq_line, left_eq_line)
         self.interpolated_right_side = interpolated_points[index:]
-        print("Right side = ", self.interpolated_right_side)
-        self.interpolated_left_side = interpolated_points[:index]
-        print("Left side = ", self.interpolated_left_side)
+        self.interpolated_left_side = interpolated_points[:index+1]
 
         # Plot the curve
-        # self.tax.plot(self.interpolated_right_side, linewidth=1.0, color = "blue", label="Interpolated curve")
+        self.tax.plot(self.interpolated_right_side, linewidth=1.0, color = "blue", label="Right interpolated curve")
         self.tax.plot(
             self.interpolated_left_side,
             linewidth=1.0,
             color="orange",
-            label="Interpolated curve",
+            label="Left interpolated curve",
         )
-
-    def tangent(self, right_eq_line, left_eq_line, points):
-        # Define the equation parameters
-        m = 0  # Slope
-        c = 0  # Intercept
-
-        # Choose a range of values for variable A
-        x_values = np.linspace(0, 100, 100)  # Example: Range from 0 to 100
-
-        # Calculate corresponding values of B and C using the equation y = mx + c
-        y_values = (m * x_values) + c
-        z_values = 100 - x_values - y_values  # Since A + B + C = 100
-
-        # Convert values to ternary coordinates
-        tangent_points = [(x, y, z) for x, y, z in zip(x_values, y_values, z_values)]
-
-        # Plot the line
-        self.tax.plot(tangent_points, linewidth=2.0, color="blue", label="Tangent line")
 
     # To generate the plot
     def plot(self):
         self.tax.clear_matplotlib_ticks()
         self.tax.get_axes().axis("off")
-        # self.tax.legend()
+        self.tax.legend()
         ternary.plt.show()
