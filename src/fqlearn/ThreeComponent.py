@@ -53,8 +53,11 @@ class ThreeComponent:
         # Remove duplicate points
         points_to_plot = list(set(points))
 
-        # Multiply each point by 100
-        points_to_plot = [(x * 100, y * 100, z * 100) for x, y, z in points_to_plot]
+        # Multiply each point by the scale
+        points_to_plot = [
+            (x * self.scale, y * self.scale, z * self.scale)
+            for x, y, z in points_to_plot
+        ]
 
         # Plot the points
         self.tax.scatter(points_to_plot, linewidth=1.0, marker="o", color="red")
@@ -102,22 +105,28 @@ class ThreeComponent:
 
         self.tax.plot(sorted_eq, linewidth=1.0, color="blue", label="Equilibrium line")
 
-    # Join the corresponding points of 2 solutes
-    def solute_points(self, soluteA, soluteB):
-        # Multiply each point by 100
-        new_soluteA = [(x * 100, y * 100, z * 100) for x, y, z in soluteA]
-        new_soluteB = [(x * 100, y * 100, z * 100) for x, y, z in soluteB]
+    # Join the corresponding points of 2 compositions
+    def composition_line(self, left_eq_line, right_eq_line):
+        # Multiply each point by the scale
+        new_left_eq_line = [
+            (x * self.scale, y * self.scale, z * self.scale) for x, y, z in left_eq_line
+        ]
+        new_right_eq_line = [
+            (x * self.scale, y * self.scale, z * self.scale)
+            for x, y, z in right_eq_line
+        ]
 
-        # Sort the points in ascending order
-        xyz = [(x, y, z) for x, y, z in new_soluteA]
-        sorted_soluteA = sorted(xyz, key=lambda m: m[0])
-        xyz = [(x, y, z) for x, y, z in new_soluteB]
-        sorted_soluteB = sorted(xyz, key=lambda m: m[0], reverse=True)
+        # Sort the left points in ascending order
+        xyz = [(x, y, z) for x, y, z in new_left_eq_line]
+        sorted_left_eq_line = sorted(xyz, key=lambda m: m[0])
+        # Sort the right points in descending order
+        xyz = [(x, y, z) for x, y, z in new_right_eq_line]
+        sorted_right_eq_line = sorted(xyz, key=lambda m: m[0], reverse=True)
 
-        for i in range(len(soluteA)):
-            pointA = sorted_soluteA[i]
+        for i in range(len(left_eq_line)):
+            pointA = sorted_left_eq_line[i]
             assert sum(pointA) == self.scale
-            pointB = sorted_soluteB[i]
+            pointB = sorted_right_eq_line[i]
             assert sum(pointB) == self.scale
 
             # Extract x and y coordinates of each point
@@ -132,17 +141,22 @@ class ThreeComponent:
                 linewidth=1.0,
                 color="blue",
             )
-        i + 1
 
     # Calculate the slope between the points on the left and right
     def eq_slope(self, right_eq_line, left_eq_line):
-        # Multiply each point by 100
-        right_eq_line = [(x * 100, y * 100, z * 100) for x, y, z in right_eq_line]
-        left_eq_line = [(x * 100, y * 100, z * 100) for x, y, z in left_eq_line]
+        # Multiply each point by the scale
+        right_eq_line = [
+            (x * self.scale, y * self.scale, z * self.scale)
+            for x, y, z in right_eq_line
+        ]
+        left_eq_line = [
+            (x * self.scale, y * self.scale, z * self.scale) for x, y, z in left_eq_line
+        ]
 
-        # Sort the points in ascending order
+        # Sort the right points in ascending order
         xyz = [(x, y, z) for x, y, z in right_eq_line]
         right_eq = sorted(xyz, key=lambda m: m[0])
+        # Sort the left points in descending order
         xyz = [(x, y, z) for x, y, z in left_eq_line]
         left_eq = sorted(xyz, key=lambda m: m[0], reverse=True)
 
@@ -165,7 +179,6 @@ class ThreeComponent:
             else:
                 # For vertical lines, return None for slope
                 slopes.append(0)
-        i + 1
         print("Slope = ", slopes)
 
         # Calculate average of the slopes
@@ -182,14 +195,14 @@ class ThreeComponent:
         y = [y for x, y, z in sorted_points]
 
         f = CubicSpline(x, y, bc_type="natural")
-        x_cubic = np.linspace(0, 100, 100)
+        x_cubic = np.linspace(0, self.scale, self.scale)
         y_cubic = f(x_cubic)
 
         # Remove negative points
         interpolated_points = [
             [i, j]
             for i, j in np.column_stack((x_cubic, y_cubic))
-            if 0 <= i <= 100 and 0 <= j <= 100
+            if 0 <= i <= self.scale and 0 <= j <= self.scale
         ]
 
         return interpolated_points
